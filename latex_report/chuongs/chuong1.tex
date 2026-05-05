@@ -8,25 +8,25 @@ MPLS được sử dụng trong mạng nhà cung cấp để chuyển tiếp gó
 
 \subsection{Mục tiêu nghiên cứu}
 
-Project hướng đến bốn mục tiêu chính:
+Đề tài hướng đến bốn mục tiêu chính:
 \begin{enumerate}
     \item Xây dựng topology Mininet gồm ba chi nhánh: Branch 1 Flat Network, Branch 2 Three-tier Network và Branch 3 Leaf-Spine Network.
     \item Triển khai provider backbone gồm CE, PE và P router, trong đó phần lõi dùng Linux kernel MPLS native để push, swap và pop label.
     \item Đo kiểm kết nối và hiệu năng bằng công cụ thật: ping, traceroute, iperf3 TCP, iperf3 UDP và tcpdump.
-    \item Tự động hóa quy trình chạy test, sinh bảng kết quả, biểu đồ, GUI giám sát và báo cáo.
+    \item Xây dựng công cụ tự động hóa quy trình cấu hình, đo kiểm, kết xuất biểu đồ và giao diện giám sát.
 \end{enumerate}
 
 \subsection{Phạm vi triển khai}
 
 Mô hình được triển khai trên một máy Linux/Ubuntu có Mininet và Open vSwitch. Các router trong topology là Linux node có bật \texttt{net.ipv4.ip\_forward=1}. Mạng lõi MPLS dùng các module kernel \texttt{mpls\_router}, \texttt{mpls\_iptunnel}, FRRouting OSPF/LDP để hội tụ route và phân phối label động, cùng bảng \texttt{ip -f mpls route}. Ở biên dịch vụ, các CE được đưa vào service VPLS/L2VPN để lưu lượng liên chi nhánh đi qua data-plane L2VPN trên underlay MPLS.
 
-\subsection{Đóng góp của project}
+\subsection{Đóng góp của đề tài}
 
-So với một topology Mininet cơ bản, project có các điểm mở rộng sau:
+Đề tài mang lại các đóng góp cụ thể như sau:
 \begin{itemize}
-    \item Có ba kiến trúc LAN khác nhau để so sánh ảnh hưởng đến hiệu năng.
-    \item Có bằng chứng MPLS thật qua route table và tcpdump ethertype \texttt{0x8847}.
-    \item Có UDP load sweep để đánh giá packet loss khi tải mạng tăng.
-    \item Có GUI hỗ trợ demo từng phép đo theo cặp host được chọn.
-    \item Có pipeline một lệnh để cleanup, vẽ topology, chạy benchmark, vẽ chart và tạo báo cáo.
+    \item Cài đặt thành công ba kiến trúc LAN khác nhau nhằm so sánh và đánh giá ảnh hưởng của kiến trúc nội bộ đến hiệu năng toàn mạng.
+    \item Xác minh được quá trình chuyển tiếp bằng nhãn MPLS thực tế thông qua bảng định tuyến và phân tích gói tin.
+    \item Đánh giá được mức độ suy hao gói tin (packet loss) khi tăng tải mạng thông qua các kịch bản stress-test UDP.
+    \item Cung cấp giao diện trực quan hỗ trợ giám sát và thực hiện các phép đo theo thời gian thực.
+    \item Xây dựng pipeline tự động hóa hoàn chỉnh quá trình triển khai, đo đạc và báo cáo.
 \end{itemize}

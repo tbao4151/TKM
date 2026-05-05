@@ -70,9 +70,9 @@ Branch3/svr1 & Branch3/os1 & 94.397 & 10.932 & 0.000 & 0.286 \\
 \end{tabularx}
 \end{table}
 
-\subsection{Kết quả packet loss khi tải tăng}
+\subsection{Kết quả suy hao gói tin (packet loss) khi tải tăng}
 
-Khi tải UDP tăng lên 80M và 120M, packet loss bắt đầu xuất hiện rõ vì offered load vượt hoặc áp sát năng lực các link backbone 50--60 Mbps. Đây là minh chứng đáp ứng yêu cầu ``Packet loss khi tải mạng tăng'' của đề bài.
+Khi tải UDP tăng lên 80 Mbps và 120 Mbps, hiện tượng suy hao gói tin (packet loss) bắt đầu xuất hiện rõ rệt do tải cung cấp (offered load) vượt quá hoặc áp sát giới hạn năng lực của các liên kết backbone (50--60 Mbps). Điều này phản ánh chính xác tình trạng tắc nghẽn khi tải mạng tăng cao.
 
 \begin{table}[H]
 \centering
@@ -132,34 +132,10 @@ Branch2 user1 -- Branch3 svr2 & 120 & 0.291 & 47.165 \\
 
 Kết quả cho thấy traffic nội bộ cùng chi nhánh có throughput gần 94--95 Mbps và delay thấp hơn traffic liên chi nhánh. Branch 1 có đường nội bộ ngắn nên delay nội bộ thấp nhất. Branch 2 có thêm các lớp access/distribution/core nên delay nội bộ cao hơn Branch 1. Branch 3 dùng leaf-spine nhưng do lab loop-free và cùng subnet, delay nội bộ vẫn thấp; khi đi liên chi nhánh, yếu tố chi phối chính là backbone provider và đường MPLS.
 
-\subsection{Đánh giá so với IP routing truyền thống}
+\subsection{Đánh giá so với định tuyến IP truyền thống}
 
-Mode \texttt{ip} trong project dùng để làm baseline khi cần so sánh. Điểm khác biệt quan trọng của mode \texttt{mpls} là P router không cần static route đến LAN khách hàng; P router forward dựa trên \texttt{ip -f mpls route}. Điều này thể hiện đúng vai trò lõi provider: lõi chuyển tiếp bằng label, biên PE chịu trách nhiệm ánh xạ prefix khách hàng vào LSP.
-
-\subsection{Đối chiếu rubric}
-
-\begin{table}[H]
-\centering
-\caption{Đối chiếu nhanh với rubric}
-\begin{tabularx}{\linewidth}{|l|X|X|}
-\hline
-\textbf{Tiêu chí} & \textbf{Minh chứng trong project} & \textbf{Ghi chú} \\
-\hline
-Hình thức & Báo cáo LaTeX có bìa, mục lục, danh mục hình, bảng, tài liệu tham khảo, phụ lục & Đúng mẫu báo cáo \\
-\hline
-Topology & Có Flat, Three-tier, Leaf-Spine, CE/PE/P backbone & Dựng bằng Mininet \\
-\hline
-MPLS & Có route \texttt{encap mpls}, \texttt{ip -f mpls route}, tcpdump \texttt{0x8847}; OSPF/LDP có log hội tụ & MPLS kernel native + FRRouting control-plane \\
-\hline
-Hiệu năng & Có throughput, delay, jitter, packet loss theo tải tăng & Lấy từ ping và iperf3 thật \\
-\hline
-Minh chứng & Có raw logs ping, traceroute, iperf3, MPLS route, tcpdump & Lưu trong thư mục \texttt{results/} \\
-\hline
-Sáng tạo & Có runner tự động, parser, chart, GUI monitor & Hỗ trợ demo nhanh \\
-\hline
-\end{tabularx}
-\end{table}
+Cấu hình định tuyến IP truyền thống được sử dụng làm cơ sở (baseline) để so sánh. Điểm khác biệt quan trọng của môi trường MPLS là các bộ định tuyến P không cần lưu trữ thông tin định tuyến tĩnh đến các mạng LAN khách hàng; thay vào đó, quá trình chuyển tiếp diễn ra hoàn toàn thông qua nhãn. Điều này minh chứng rõ nét vai trò của mạng lõi nhà cung cấp: lõi chỉ tập trung chuyển tiếp bằng nhãn, trong khi các bộ định tuyến biên (PE) chịu trách nhiệm ánh xạ dải địa chỉ của khách hàng vào các đường dẫn chuyển mạch nhãn (LSP).
 
 \subsection{Nhận xét tổng hợp}
 
-Project đã đáp ứng yêu cầu đề bài về Metro Ethernet MPLS và có bằng chứng gói MPLS thật. Phiên bản hiện tại đã thêm FRRouting để chạy OSPF/LDP trong các namespace PE/P; log \texttt{frr\_control\_plane.txt} cho thấy OSPF \texttt{Full/-}, LDP \texttt{OPERATIONAL}, label binding, bảng MPLS do LDP sinh ra, VPLS running-config, bridge member và GRETAP pseudowire. Phần kết luận, lưu ý bảo vệ và hướng phát triển được tách riêng ở Chương V để bám sát rubric 5 chương.
+Mô hình đã mô phỏng thành công mạng Metro Ethernet dựa trên MPLS và cung cấp đầy đủ minh chứng về việc chuyển tiếp bằng nhãn thực tế. Hệ thống tích hợp FRRouting để vận hành OSPF và LDP trong các không gian mạng (namespace) của PE/P. Kết quả log ghi nhận OSPF đạt trạng thái \texttt{Full/-}, LDP hoạt động bình thường (\texttt{OPERATIONAL}), đồng thời thực hiện thành công việc phân bổ nhãn và thiết lập bảng chuyển tiếp MPLS. Việc triển khai thành công VPLS thông qua các kết nối GRETAP pseudowire càng làm rõ tính hiệu quả của kiến trúc phân lớp này.

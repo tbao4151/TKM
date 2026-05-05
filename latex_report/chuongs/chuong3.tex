@@ -32,7 +32,7 @@ Branch 2 gồm các lớp access, distribution và core. Nhóm host gồm \textt
 
 \subsection{Thiết kế Branch 3: Leaf-Spine Network}
 
-Branch 3 gồm bốn leaf, hai spine, các server \texttt{svr1}, \texttt{svr2}, \texttt{svr3a}, \texttt{svr3b}, \texttt{svr4} và host \texttt{os1}, \texttt{os2}. Subnet chính là \texttt{10.3.0.0/24}, gateway là \texttt{10.3.0.1}. Topology được giữ loop-free ở Layer 2 để tránh phụ thuộc STP khi demo trên VM nhỏ.
+Branch 3 gồm bốn leaf, hai spine, các server \texttt{svr1}, \texttt{svr2}, \texttt{svr3a}, \texttt{svr3b}, \texttt{svr4} và host \texttt{os1}, \texttt{os2}. Subnet chính là \texttt{10.3.0.0/24}, gateway là \texttt{10.3.0.1}. Topology được thiết kế không có vòng lặp (loop-free) ở Layer 2 nhằm tối ưu hóa quá trình mô phỏng trên môi trường ảo hóa.
 
 \begin{figure}[H]
     \centering

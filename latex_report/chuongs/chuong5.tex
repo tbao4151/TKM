@@ -2,27 +2,19 @@
 
 \subsection{Kết luận}
 
-Project đã xây dựng được mô hình Metro Ethernet kết nối ba chi nhánh doanh nghiệp trên Mininet với ba kiến trúc LAN khác nhau: Flat, Three-tier và Leaf-Spine. Phần backbone nhà cung cấp có đủ vai trò CE, PE và P router; mode \texttt{mpls} chạy Linux kernel MPLS native, có FRRouting OSPF/LDP control-plane và có log kiểm chứng route/label thật trong \texttt{results/mpls\_routes.txt}, \texttt{results/frr\_control\_plane.txt}, \texttt{results/tcpdump\_mpls.txt}.
+Nghiên cứu đã xây dựng thành công mô hình Metro Ethernet kết nối ba chi nhánh doanh nghiệp trên nền tảng Mininet, áp dụng ba kiến trúc mạng nội bộ (LAN) điển hình: Flat Network, Three-tier Network và Leaf-Spine Network. Cấu trúc mạng lõi (backbone) của nhà cung cấp dịch vụ được thiết kế hoàn chỉnh với các thành phần CE, PE và P router. Đặc biệt, chế độ hoạt động \texttt{mpls} đã sử dụng thành công Linux kernel MPLS kết hợp cùng FRRouting (OSPF/LDP) để cấu hình control-plane, cung cấp cơ chế phân giải và định tuyến nhãn thực tế.
 
-Về mặt chấm điểm, project hiện đáp ứng các ý chính của rubric:
-\begin{itemize}
-    \item Có báo cáo đúng bố cục 5 chương, có mục lục, danh mục hình, danh mục bảng và phụ lục lệnh demo.
-    \item Có sơ đồ tổng thể, sơ đồ ba chi nhánh, sơ đồ backbone và minh chứng kết quả test thực tế.
-    \item Có giải thích bản chất MPLS, vai trò CE/PE/P, push/swap/pop label và sự khác biệt giữa ba kiến trúc LAN.
-    \item Có benchmark thực tế cho throughput, delay, jitter và packet loss khi tải mạng tăng.
-    \item Có tài liệu hướng dẫn chạy theo rubric và kịch bản thuyết trình để hỗ trợ phần demo và phản biện.
-\end{itemize}
+Kết quả đo lường và đánh giá cho thấy mô hình hoạt động ổn định, thực hiện đúng các chức năng chuyển mạch nhãn (push/swap/pop) và cho phép phân tích chuyên sâu hiệu năng mạng (throughput, delay, jitter và packet loss) khi vận hành ở các mức tải (load) khác nhau.
 
-\subsection{Điểm cần trình bày trung thực khi bảo vệ}
+\subsection{Đánh giá hạn chế}
 
-Điểm cần nói rõ với giảng viên là project dùng Linux kernel MPLS native để xử lý label thật trên underlay, còn data-plane VPLS/L2VPN trong Mininet được hiện thực bằng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation. FRRouting vẫn chạy OSPF/LDP trong namespace PE/P và có block \texttt{l2vpn type vpls} trong running-config để bám sát rubric, nhưng không nên phát biểu quá mức theo hướng ``native FRR VPLS end-to-end hoàn toàn'' nếu chưa kiểm chứng riêng phần đó.
+Bên cạnh các kết quả đạt được, mô hình vẫn còn một số điểm cần lưu ý. Việc xử lý nhãn (label switching) được thực thi hoàn toàn bằng MPLS native trên Linux kernel, trong khi mặt phẳng dữ liệu (data-plane) của VPLS/L2VPN trong Mininet đang được hiện thực hóa dựa trên cơ chế full-mesh Linux GRETAP pseudowire với tính năng split-horizon/port-isolation. Mặc dù cấu hình FRRouting vẫn vận hành giao thức OSPF/LDP trong các không gian mạng (namespace) của PE/P và khai báo cấu hình \texttt{l2vpn type vpls}, việc triển khai VPLS theo phương thức hoàn toàn native từ đầu đến cuối trên FRR vẫn cần thêm các nghiên cứu độc lập để đánh giá toàn diện.
 
 \subsection{Hướng phát triển}
 
-Nếu tiếp tục mở rộng, project có thể phát triển theo các hướng:
+Để tiếp tục hoàn thiện và mở rộng, nghiên cứu có thể hướng tới các mục tiêu sau:
 \begin{itemize}
-    \item Thêm chi nhánh thứ tư hoặc nhiều VRF/service hơn để mô phỏng doanh nghiệp lớn.
-    \item So sánh sâu hơn giữa mode \texttt{ip} và mode \texttt{mpls} trên cùng bộ benchmark.
-    \item Bổ sung cơ chế ECMP, traffic engineering hoặc QoS để tăng điểm phần ``triển khai nghiên cứu''.
-    \item Tự động sinh PDF LaTeX và đóng gói artifact nộp bài trong một script duy nhất.
+    \item Triển khai thêm các chi nhánh mới hoặc đa dạng hóa các dịch vụ VRF/VPN nhằm mô phỏng hệ thống mạng của các tập đoàn, doanh nghiệp quy mô lớn.
+    \item Thực hiện so sánh chuyên sâu và toàn diện hơn giữa mạng định tuyến IP truyền thống và mạng chuyển mạch nhãn MPLS dựa trên cùng một bộ tiêu chuẩn đo lường (benchmark).
+    \item Nghiên cứu tích hợp cơ chế đa đường dẫn bằng nhau (ECMP), kỹ thuật điều khiển lưu lượng (Traffic Engineering) hoặc quản lý chất lượng dịch vụ (QoS) nhằm tối ưu hóa đường truyền MPLS.
 \end{itemize}

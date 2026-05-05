@@ -13,7 +13,7 @@ Trong mô hình provider:
     \item P (Provider) nằm trong lõi provider, không cần biết chi tiết LAN khách hàng mà chủ yếu chuyển tiếp dựa trên label.
 \end{itemize}
 
-Phân tách CE/PE/P giúp báo cáo mô phỏng đúng vai trò của từng miền: khách hàng chịu trách nhiệm LAN nội bộ, provider chịu trách nhiệm backbone và chuyển tiếp liên chi nhánh.
+Việc phân tách CE/PE/P giúp mô phỏng đúng vai trò của từng miền: khách hàng chịu trách nhiệm LAN nội bộ, provider chịu trách nhiệm backbone và chuyển tiếp liên chi nhánh.
 
 \subsection{Nguyên lý MPLS label switching}
 
@@ -24,13 +24,13 @@ MPLS gắn một shim header 4 byte giữa Ethernet header và IP packet. Router
     \item Pop label: egress PE bỏ label trước khi chuyển gói về CE và LAN đích.
 \end{itemize}
 
-Trong project, quá trình này được chứng minh bằng hai nhóm log. Bảng route MPLS cho thấy các dòng \texttt{encap mpls}, \texttt{proto ldp} và \texttt{as to} trong backbone. Tcpdump trên core link bắt được ethertype \texttt{0x8847} và label động do LDP cấp phát, chứng minh traffic đi qua miền MPLS bằng label thật.
+Trong mô hình thực nghiệm, quá trình này được xác minh thông qua bảng định tuyến MPLS và phân tích gói tin. Bảng route MPLS cho thấy các dòng \texttt{encap mpls}, \texttt{proto ldp} và \texttt{as to} trong backbone. Phân tích gói tin trên core link bắt được ethertype \texttt{0x8847} và label động do LDP cấp phát, chứng minh lưu lượng đi qua miền MPLS bằng nhãn thực tế.
 
-\subsection{OSPF, LDP, VPLS và cách project xử lý yêu cầu rubric}
+\subsection{Ứng dụng OSPF, LDP và VPLS}
 
-Rubric có nhắc đến OSPF, LDP và VPLS ở mức điểm tối đa. Trong mạng MPLS nhà cung cấp thực tế, OSPF/IS-IS thường dùng để hội tụ định tuyến lõi, LDP dùng để phân phối label động, còn VPLS cung cấp dịch vụ L2VPN đa điểm.
+Trong mạng MPLS nhà cung cấp thực tế, giao thức định tuyến OSPF/IS-IS thường được dùng để hội tụ định tuyến lõi, LDP dùng để phân phối label động, và VPLS cung cấp dịch vụ L2VPN đa điểm.
 
-Project này triển khai MPLS native bằng Linux kernel và tích hợp FRRouting trong các namespace PE/P. OSPF dùng để học router-id và mạng lõi, LDP phân phối label động trong backbone; bằng chứng được lưu ở \texttt{results/frr\_control\_plane.txt} với trạng thái OSPF \texttt{Full/-}, LDP \texttt{OPERATIONAL}, bảng binding và \texttt{show mpls table}. Luồng CE/branch được đưa vào service VPLS/L2VPN; data-plane L2VPN trong Mininet dùng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation trên underlay MPLS để có forward thật và kiểm chứng được.
+Mô hình triển khai MPLS native bằng Linux kernel và tích hợp FRRouting trong các thiết bị PE/P. OSPF dùng để học router-id và mạng lõi, LDP phân phối label động trong backbone. Trạng thái hoạt động được xác minh thông qua các thông số OSPF \texttt{Full/-}, LDP \texttt{OPERATIONAL}, và bảng cấp phát nhãn. Lưu lượng từ CE được đưa vào service VPLS/L2VPN; data-plane L2VPN trong Mininet sử dụng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation trên underlay MPLS, nhằm đảm bảo khả năng chuyển tiếp dữ liệu thực tế và dễ dàng kiểm chứng.
 
 \subsection{Các kiến trúc LAN trong ba chi nhánh}
 
