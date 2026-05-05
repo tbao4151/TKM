@@ -21,7 +21,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from mininet.log import setLogLevel
 
-from network_config import HOST_IP, TEST_PAIRS, TestPair, connectivity_checks
+from network_config import HOST_IP, TEST_PAIRS, TestPair, capture_mpls_packets, collect_mpls_state, connectivity_checks
 from topology_mininet import start_configured_network
 
 
@@ -32,6 +32,7 @@ IPERF_SERVER_TIMEOUT_SECONDS = 25
 
 CSV_FIELDS = [
     "timestamp",
+    "mode",
     "source_branch",
     "destination_branch",
     "source_host",
@@ -151,7 +152,7 @@ def run_iperf3_udp_jitter(src, dst, dst_ip: str, port: int) -> Tuple[Optional[fl
         return None, None, f"{output}\nPARSE_ERROR: {exc}"
 
 
-def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
+def row_for_pair(net, pair: TestPair, port_base: int, mode: str) -> Dict[str, object]:
     src = net.get(pair.source_host)
     dst = net.get(pair.destination_host)
     dst_ip = HOST_IP[pair.destination_host]
@@ -196,6 +197,7 @@ def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
 
     return {
         "timestamp": timestamp,
+        "mode": mode,
         "source_branch": pair.source_branch,
         "destination_branch": pair.destination_branch,
         "source_host": pair.source_host,
@@ -212,27 +214,47 @@ def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
 
 def reset_logs() -> None:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    for name in ("ping_results.txt", "iperf_results.txt", "traceroute_results.txt", "command_history.txt"):
+    for name in (
+        "ping_results.txt",
+        "iperf_results.txt",
+        "traceroute_results.txt",
+        "mpls_routes.txt",
+        "tcpdump_mpls.txt",
+        "command_history.txt",
+    ):
         (RESULTS_DIR / name).write_text("", encoding="utf-8")
 
 
-def run_all_tests() -> int:
+def save_mpls_verification(net) -> None:
+    progress("Saving Linux kernel MPLS route tables")
+    mpls_state = collect_mpls_state(net)
+    append_log(RESULTS_DIR / "mpls_routes.txt", mpls_state)
+    progress("Capturing real MPLS packets on p3-eth0")
+    capture_output = capture_mpls_packets(net)
+    append_log(RESULTS_DIR / "tcpdump_mpls.txt", capture_output)
+    if "MPLS" not in capture_output:
+        raise RuntimeError("tcpdump khong bat duoc goi MPLS tren p3-eth0")
+
+
+def run_all_tests(mode: str = "mpls", stp_wait: int = 20) -> int:
     setLogLevel("warning")
     reset_logs()
-    append_log(RESULTS_DIR / "command_history.txt", f"Test run started: {datetime.now().isoformat(timespec='seconds')}")
+    append_log(RESULTS_DIR / "command_history.txt", f"Test run started: {datetime.now().isoformat(timespec='seconds')} | mode={mode}")
     net = None
     rows = []
     try:
-        progress("Starting Mininet topology for real performance tests")
-        net = start_configured_network()
+        progress(f"Starting Mininet topology for real performance tests in {mode} mode")
+        net = start_configured_network(mode=mode, stp_wait=stp_wait)
         progress("Topology started and configured; running precheck pings")
         for src, dst, ok, output in connectivity_checks(net):
             append_log(RESULTS_DIR / "ping_results.txt", f"\n===== PRECHECK {src} -> {dst} =====\n{output}")
             if not ok:
                 append_log(RESULTS_DIR / "command_history.txt", f"PRECHECK_FAIL {src}->{dst}")
             progress(f"Precheck {src} -> {dst}: {'OK' if ok else 'FAIL'}")
+        if mode == "mpls":
+            save_mpls_verification(net)
         for index, pair in enumerate(TEST_PAIRS, start=1):
-            rows.append(row_for_pair(net, pair, 5200 + index))
+            rows.append(row_for_pair(net, pair, 5200 + index, mode))
     except Exception as exc:
         progress(f"ERROR: performance test aborted: {exc}")
         append_log(RESULTS_DIR / "ping_results.txt", f"\n===== TEST ABORTED =====\n{exc}\n")
@@ -247,15 +269,17 @@ def run_all_tests() -> int:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
-    append_log(RESULTS_DIR / "command_history.txt", f"Test run finished: {datetime.now().isoformat(timespec='seconds')}")
+    append_log(RESULTS_DIR / "command_history.txt", f"Test run finished: {datetime.now().isoformat(timespec='seconds')} | mode={mode}")
     print(f"Wrote real test results to {csv_path}")
     return 0 if rows else 1
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run real Mininet performance tests")
-    parser.parse_args()
-    return run_all_tests()
+    parser.add_argument("--mode", choices=("ip", "mpls"), default="mpls", help="forwarding mode")
+    parser.add_argument("--stp-wait", type=int, default=20, help="seconds to wait for OVS STP convergence")
+    args = parser.parse_args()
+    return run_all_tests(mode=args.mode, stp_wait=args.stp_wait)
 
 
 if __name__ == "__main__":

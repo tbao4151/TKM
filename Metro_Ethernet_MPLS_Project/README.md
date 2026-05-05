@@ -6,14 +6,14 @@ Project mon hoc: **Thiet ke va trien khai mang Metro Ethernet su dung MPLS cho k
 
 - Mo phong 3 chi nhanh doanh nghiep tren Mininet.
 - Ket noi cac chi nhanh qua provider backbone gom CE, PE va P router.
-- Kiem thu that bang ping, iperf3 va traceroute.
+- Kiem thu that bang ping, iperf3, traceroute va tcpdump MPLS.
 - Tao `results/results.csv`, bieu do, bao cao Word va tai lieu van dap.
 
 ## Yeu cau he thong
 
 - Ubuntu/Linux.
 - Quyen sudo.
-- Mininet, Open vSwitch, iperf/iperf3, traceroute, Python 3.
+- Mininet, Open vSwitch, Linux kernel MPLS, iperf/iperf3, traceroute, tcpdump, Python 3.
 
 ## Cai moi truong
 
@@ -41,7 +41,7 @@ Script se cleanup Mininet, ve topology, chay test that, tao chart va tao bao cao
 sudo mn -c
 python3 draw_network_topology.py
 python3 code/draw_topology.py
-sudo python3 code/topology_mininet.py
+sudo python3 code/topology_mininet.py --mode mpls
 ```
 
 Trong Mininet CLI co the demo:
@@ -54,7 +54,7 @@ host2 traceroute -n 10.3.0.11
 De chay do kiem tu dong:
 
 ```bash
-sudo python3 code/performance_test.py
+sudo python3 code/performance_test.py --mode mpls
 python3 code/plot_results.py
 python3 code/generate_report.py
 ```
@@ -85,7 +85,18 @@ sudo mn -c
 
 ## Ghi chu ve MPLS
 
-Project uu tien MPLS native neu moi truong ho tro. Trong moi truong Mininet/Open vSwitch thong dung, label switching native co the khong kha dung, nen project dung static route that qua CE/PE/P de mo phong co che forwarding tuong duong MPLS ve logic. Du lieu do hieu nang van la du lieu that trong topology Mininet, khong phai du lieu mau.
+Project nay dung Linux kernel MPLS native trong mode `mpls`. PE router dung `ip route ... encap mpls` de push label, P router dung `ip -f mpls route` de swap label, va egress PE pop label roi chuyen goi IP ve CE. Bang chung nam trong:
+
+```text
+results/mpls_routes.txt
+results/tcpdump_mpls.txt
+```
+
+Neu muon so sanh baseline IP routing, chay:
+
+```bash
+sudo python3 code/performance_test.py --mode ip
+```
 
 ## Kiem tra ket qua that
 
@@ -97,6 +108,8 @@ Kiem tra log:
 cat results/ping_results.txt
 cat results/iperf_results.txt
 cat results/traceroute_results.txt
+cat results/mpls_routes.txt
+cat results/tcpdump_mpls.txt
 cat results/command_history.txt
 ```
 

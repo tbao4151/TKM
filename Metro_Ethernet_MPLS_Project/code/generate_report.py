@@ -12,6 +12,8 @@ from docx.shared import Inches, Pt
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 RESULTS_CSV = PROJECT_DIR / "results" / "results.csv"
+MPLS_ROUTES = PROJECT_DIR / "results" / "mpls_routes.txt"
+MPLS_TCPDUMP = PROJECT_DIR / "results" / "tcpdump_mpls.txt"
 IMAGE_DIR = PROJECT_DIR / "images"
 REPORT_DIR = PROJECT_DIR / "report"
 REPORT_PATH = REPORT_DIR / "Bao_cao_Metro_Ethernet_MPLS_Mininet.docx"
@@ -47,6 +49,8 @@ def add_results_table(doc: Document, df: pd.DataFrame) -> None:
         "timestamp", "source_branch", "destination_branch", "source_host", "destination_host",
         "throughput_mbps", "avg_delay_ms", "packet_loss_percent", "jitter_ms", "note",
     ]
+    if "mode" in df.columns:
+        cols.insert(1, "mode")
     if "udp_packet_loss_percent" in df.columns:
         cols.insert(cols.index("note"), "udp_packet_loss_percent")
     table = doc.add_table(rows=1, cols=len(cols))
@@ -57,6 +61,18 @@ def add_results_table(doc: Document, df: pd.DataFrame) -> None:
         cells = table.add_row().cells
         for i, col in enumerate(cols):
             cells[i].text = str(row[col])
+
+
+def add_text_excerpt(doc: Document, path: Path, max_lines: int = 28) -> None:
+    if not path.exists() or path.stat().st_size == 0:
+        doc.add_paragraph(f"[Canh bao] Chua co file minh chung: {path.name}")
+        return
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    excerpt = "\n".join(lines[:max_lines])
+    paragraph = doc.add_paragraph()
+    run = paragraph.add_run(excerpt)
+    run.font.name = "Courier New"
+    run.font.size = Pt(8)
 
 
 def main():
@@ -99,7 +115,7 @@ def main():
 
     add_heading(doc, "2. Muc tieu nghien cuu")
     doc.add_paragraph(
-        "Muc tieu la thiet ke mo hinh CE-PE-P, cau hinh forwarding lien chi nhanh, kiem thu connectivity va do throughput, delay, packet loss, jitter."
+        "Muc tieu la thiet ke mo hinh CE-PE-P, cau hinh Linux kernel MPLS lien chi nhanh, kiem thu connectivity va do throughput, delay, packet loss, jitter."
     )
 
     add_heading(doc, "3. Co so ly thuyet Metro Ethernet MAN")
@@ -144,9 +160,17 @@ def main():
 
     add_heading(doc, "12. Cau hinh dinh tuyen/forwarding")
     doc.add_paragraph(
-        "Moi truong nay su dung static route that de mo phong forwarding tuong duong MPLS ve logic. Neu kernel/OVS khong ho tro MPLS native, bao cao khong tu nhan la MPLS native. "
-        "Du lieu do van la du lieu that vi goi tin di qua topology CE-PE-P-PE-CE trong Mininet."
+        "Mode MPLS su dung Linux kernel MPLS that: PE dau vao push label, P router swap label, egress PE pop label roi chuyen tiep IP ve CE. "
+        "Bang chung cau hinh nam trong results/mpls_routes.txt va goi MPLS bat bang tcpdump nam trong results/tcpdump_mpls.txt."
     )
+
+    add_heading(doc, "12.1 Minh chung bang route MPLS kernel", level=2)
+    doc.add_paragraph("Trich xuat bang route MPLS that tren PE/P. Cac dong `encap mpls` the hien push label tren PE; cac dong `as to` the hien swap label tren P.")
+    add_text_excerpt(doc, MPLS_ROUTES, max_lines=34)
+
+    add_heading(doc, "12.2 Minh chung bang tcpdump va hex dump", level=2)
+    doc.add_paragraph("Tcpdump tren core link p3-eth0 bat duoc ethertype 0x8847 va MPLS shim header 4 byte; day la bang chung goi tin di bang label thay vi chi IP routing.")
+    add_text_excerpt(doc, MPLS_TCPDUMP, max_lines=32)
 
     add_heading(doc, "13. Kiem thu ket noi thuc te")
     doc.add_paragraph("Kiem thu dung ping giua Branch1-Branch2, Branch1-Branch3 va Branch2-Branch3. Log chi tiet nam trong results/ping_results.txt.")
@@ -171,7 +195,8 @@ def main():
 
     add_heading(doc, "18. Danh gia hoat dong MPLS hoac forwarding tuong duong MPLS")
     doc.add_paragraph(
-        "Do Mininet/OVS thong dung khong luon ho tro label switching native, project dung forwarding tuong duong bang static route. Traceroute va ping chung minh goi tin di qua CE/PE/P that."
+        "Project da cau hinh Linux kernel MPLS native trong cac namespace PE/P. Ingress PE dung ip route encap mpls de push label, P router dung ip -f mpls route de swap label, egress PE pop label ve CE. "
+        "Trong lab nay label duoc gan tinh bang Python de de kiem soat va demo; day la LSP tinh, khong phai LDP dong."
     )
 
     add_heading(doc, "19. So sanh MPLS voi IP routing truyen thong")
@@ -181,7 +206,7 @@ def main():
 
     add_heading(doc, "20. Han che cua mo hinh")
     doc.add_paragraph(
-        "Lab chay tren mot may ao nen ket qua phu thuoc CPU, kernel, OVS va tai he thong. Mo hinh MPLS la MPLS-like forwarding neu moi truong khong ho tro MPLS native."
+        "Lab chay tren mot may ao nen ket qua phu thuoc CPU, kernel, OVS va tai he thong. MPLS native yeu cau kernel co module mpls_router va mpls_iptunnel."
     )
 
     add_heading(doc, "21. Ket luan")

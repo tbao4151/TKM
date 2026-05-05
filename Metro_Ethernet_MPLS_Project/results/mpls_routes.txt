@@ -1,0 +1,88 @@
+===== pe1: ip route show =====
+10.1.0.0/24 via 172.16.1.2 dev pe1-eth0 
+10.2.0.0/24  encap mpls  120 via 172.20.13.2 dev pe1-eth2 
+10.3.0.0/24  encap mpls  130 via 172.20.11.2 dev pe1-eth1 
+172.16.1.0/30 dev pe1-eth0 proto kernel scope link src 172.16.1.1 
+172.20.11.0/30 dev pe1-eth1 proto kernel scope link src 172.20.11.1 
+172.20.13.0/30 dev pe1-eth2 proto kernel scope link src 172.20.13.1 
+
+===== pe1: ip -f mpls route show =====
+211 via inet 172.16.1.2 dev pe1-eth0 
+312 via inet 172.16.1.2 dev pe1-eth0 
+
+===== pe1: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== pe2: ip route show =====
+10.1.0.0/24  encap mpls  210 via 172.20.23.2 dev pe2-eth1 
+10.2.0.0/24 via 172.16.2.2 dev pe2-eth0 
+10.3.0.0/24  encap mpls  230 via 172.20.24.2 dev pe2-eth2 
+172.16.2.0/30 dev pe2-eth0 proto kernel scope link src 172.16.2.1 
+172.20.23.0/30 dev pe2-eth1 proto kernel scope link src 172.20.23.1 
+172.20.24.0/30 dev pe2-eth2 proto kernel scope link src 172.20.24.1 
+
+===== pe2: ip -f mpls route show =====
+121 via inet 172.16.2.2 dev pe2-eth0 
+321 via inet 172.16.2.2 dev pe2-eth0 
+
+===== pe2: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== pe3: ip route show =====
+10.1.0.0/24  encap mpls  310 via 172.20.32.2 dev pe3-eth1 
+10.2.0.0/24  encap mpls  320 via 172.20.34.2 dev pe3-eth2 
+10.3.0.0/24 via 172.16.3.2 dev pe3-eth0 
+172.16.3.0/30 dev pe3-eth0 proto kernel scope link src 172.16.3.1 
+172.20.32.0/30 dev pe3-eth1 proto kernel scope link src 172.20.32.1 
+172.20.34.0/30 dev pe3-eth2 proto kernel scope link src 172.20.34.1 
+
+===== pe3: ip -f mpls route show =====
+132 via inet 172.16.3.2 dev pe3-eth0 
+231 via inet 172.16.3.2 dev pe3-eth0 
+
+===== pe3: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== p1: ip route show =====
+172.20.11.0/30 dev p1-eth0 proto kernel scope link src 172.20.11.2 
+172.20.12.0/30 dev p1-eth1 proto kernel scope link src 172.20.12.1 
+
+===== p1: ip -f mpls route show =====
+130 as to 131 via inet 172.20.12.2 dev p1-eth1 
+311 as to 312 via inet 172.20.11.1 dev p1-eth0 
+
+===== p1: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== p2: ip route show =====
+172.20.12.0/30 dev p2-eth1 proto kernel scope link src 172.20.12.2 
+172.20.32.0/30 dev p2-eth0 proto kernel scope link src 172.20.32.2 
+
+===== p2: ip -f mpls route show =====
+131 as to 132 via inet 172.20.32.1 dev p2-eth0 
+310 as to 311 via inet 172.20.12.1 dev p2-eth1 
+
+===== p2: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== p3: ip route show =====
+172.20.13.0/30 dev p3-eth0 proto kernel scope link src 172.20.13.2 
+172.20.23.0/30 dev p3-eth1 proto kernel scope link src 172.20.23.2 
+
+===== p3: ip -f mpls route show =====
+120 as to 121 via inet 172.20.23.1 dev p3-eth1 
+210 as to 211 via inet 172.20.13.1 dev p3-eth0 
+
+===== p3: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000
+
+===== p4: ip route show =====
+172.20.24.0/30 dev p4-eth0 proto kernel scope link src 172.20.24.2 
+172.20.34.0/30 dev p4-eth1 proto kernel scope link src 172.20.34.2 
+
+===== p4: ip -f mpls route show =====
+230 as to 231 via inet 172.20.34.1 dev p4-eth1 
+320 as to 321 via inet 172.20.24.1 dev p4-eth0 
+
+===== p4: sysctl net.mpls.platform_labels =====
+net.mpls.platform_labels = 100000

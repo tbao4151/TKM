@@ -22,7 +22,7 @@ log_cmd() {
 log_cmd bash code/install_environment.sh
 log_cmd mn -c
 log_cmd python3 code/draw_topology.py
-log_cmd python3 code/performance_test.py
+log_cmd python3 code/performance_test.py --mode mpls
 log_cmd python3 code/plot_results.py
 log_cmd python3 code/generate_report.py
 
@@ -31,6 +31,8 @@ required_files=(
   "results/ping_results.txt"
   "results/iperf_results.txt"
   "results/traceroute_results.txt"
+  "results/mpls_routes.txt"
+  "results/tcpdump_mpls.txt"
   "images/topology_overview.png"
   "output/so_do_tong_hop.png"
   "output/so_do_tong_hop.svg"

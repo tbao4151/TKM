@@ -25,6 +25,8 @@ def load_results() -> pd.DataFrame:
     if missing:
         raise SystemExit(f"ERROR: results.csv thieu cot: {', '.join(sorted(missing))}")
     df["pair"] = df["source_branch"] + " -> " + df["destination_branch"]
+    if "mode" in df.columns:
+        df["pair"] = df["mode"].astype(str).str.upper() + ": " + df["pair"]
     return df
 
 

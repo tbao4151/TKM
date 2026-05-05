@@ -6,7 +6,7 @@ Project thiet ke va trien khai mo hinh Metro Ethernet ket noi 3 chi nhanh doanh 
 
 ## 2. Mo hinh tong the hoat dong nhu the nao?
 
-Host trong tung chi nhanh gui traffic den CE. CE day traffic sang PE cua provider. Trong backbone, PE va P router chuyen tiep goi tin den PE dich, sau do ve CE va LAN dich.
+Host trong tung chi nhanh gui traffic den CE. CE day traffic sang PE cua provider. Trong backbone, PE dau vao push MPLS label, P router swap label, PE dau ra pop label, sau do goi ve CE va LAN dich.
 
 ## 3. Giai thich Host, Switch, CE, PE, P
 
@@ -76,8 +76,8 @@ chmod +x code/install_environment.sh
 sudo bash code/install_environment.sh
 sudo mn -c
 python3 code/draw_topology.py
-sudo python3 code/topology_mininet.py
-sudo python3 code/performance_test.py
+sudo python3 code/topology_mininet.py --mode mpls
+sudo python3 code/performance_test.py --mode mpls
 python3 code/plot_results.py
 python3 code/generate_report.py
 python3 code/gui_monitor.py
@@ -91,7 +91,7 @@ chmod +x code/run_all.sh
 sudo bash code/run_all.sh
 ```
 
-`performance_test.py` tu tao topology Mininet, chay test that, sau do stop topology. Neu muon demo thu cong, chay `sudo python3 code/topology_mininet.py` de vao Mininet CLI.
+`performance_test.py` tu tao topology Mininet, chay test that, luu bang chung MPLS kernel trong `results/mpls_routes.txt` va `results/tcpdump_mpls.txt`, sau do stop topology. Neu muon demo thu cong, chay `sudo python3 code/topology_mininet.py --mode mpls` de vao Mininet CLI.
 
 ## 16. Cach cleanup Mininet
 
@@ -101,7 +101,7 @@ sudo mn -c
 
 ## 17. Cach doc results.csv
 
-File `results/results.csv` co cac cot: timestamp, source_branch, destination_branch, source_host, destination_host, throughput_mbps, avg_delay_ms, packet_loss_percent, jitter_ms, test_tool, note.
+File `results/results.csv` co cac cot: timestamp, mode, source_branch, destination_branch, source_host, destination_host, throughput_mbps, avg_delay_ms, packet_loss_percent, jitter_ms, udp_packet_loss_percent, test_tool, note.
 
 ## 18. Cach doc bieu do throughput
 
@@ -136,6 +136,8 @@ GUI co cac nut Ping, Traceroute, Throughput, Delay, Packet Loss va Jitter. Cac n
 - Da chay `sudo bash code/run_all.sh`.
 - `results/results.csv` co du lieu va timestamp moi.
 - `results/ping_results.txt`, `iperf_results.txt`, `traceroute_results.txt` co log that.
+- `results/mpls_routes.txt` co `ip -f mpls route show` that tren PE/P.
+- `results/tcpdump_mpls.txt` co goi MPLS bat duoc tren core link.
 - Cac anh trong `images/` da tao.
 - Bao cao Word da tao.
 - Chay `grep -R` de dam bao khong co mat khau trong project.
@@ -201,10 +203,10 @@ Tra loi: Kiem tra duong di goi tin qua CE/PE/P.
 Tra loi: Mininet tao namespace, interface ao va OVS bridge nen can quyen root.
 
 20. MPLS native co chay khong?  
-Tra loi: Neu moi truong ho tro thi co the mo rong. Lab nay dung static route MPLS-like neu OVS/kernel khong dam bao ho tro label switching native.
+Tra loi: Co. Lab load `mpls_router`, `mpls_iptunnel`, cau hinh `ip route encap mpls` tren PE, `ip -f mpls route` tren P/PE, va dung tcpdump bat goi MPLS that tren link core.
 
 21. MPLS-like nghia la gi?  
-Tra loi: La mo phong logic duong chuyen tiep qua CE/PE/P, khong tu nhan la label switching native.
+Tra loi: La cach mo phong logic neu may khong ho tro kernel MPLS. Ban hien tai uu tien mode `mpls` native; chi dung `--mode ip` lam baseline so sanh.
 
 22. File cau hinh route nam dau?  
 Tra loi: `code/network_config.py`.
@@ -219,7 +221,7 @@ Tra loi: Chay `python3 code/plot_results.py` sau khi co `results/results.csv`.
 Tra loi: Chay `python3 code/generate_report.py` sau khi da co CSV va chart.
 
 26. Neu ping lien chi nhanh fail thi kiem tra gi?  
-Tra loi: Kiem tra IP host, default gateway, IP forwarding tren CE/PE/P va static route.
+Tra loi: Kiem tra IP host, default gateway, IP forwarding tren CE/PE/P, `net.mpls.platform_labels`, `net.mpls.conf.<interface>.input`, `ip route show` tren PE va `ip -f mpls route show` tren P/PE.
 
 27. Vi sao packet loss co the khac 0?  
 Tra loi: Do tai may ao, OVS, CPU scheduler hoac loi ket noi trong topology.

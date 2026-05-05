@@ -4,7 +4,7 @@ Pham vi:
 - Project hien tai: Metro_Ethernet_MPLS_Project
 - De bai: thiet ke va trien khai mang Metro Ethernet su dung MPLS ket noi da chi nhanh doanh nghiep tren Mininet.
 - Muc tieu bat buoc: co topology Mininet, CE/PE/P/backbone, 3 kien truc LAN khac nhau, kiem thu ket noi, do Throughput/Delay/Packet loss/Jitter, co bieu do, phan tich va bao cao Word.
-- Muc tieu nang cao: chay MPLS label switching that bang Linux kernel MPLS neu may ao ho tro. Neu khong ho tro thi phai ghi ro han che, khong duoc tu nhan da co MPLS native.
+- Muc tieu bat buoc theo yeu cau moi cua thay: chay MPLS label switching that bang Linux kernel MPLS, co bang chung route MPLS va tcpdump bat duoc goi MPLS.
 
 TASK 0: Kiem tra moi truong Ubuntu/Mininet
 
@@ -36,7 +36,7 @@ Can tao/cap nhat:
 Tieu chi dat:
 - Mininet va OVS chay duoc.
 - iperf3, ping, traceroute co that.
-- Neu MPLS kernel khong ho tro, ghi ro trong README/bao cao la han che.
+- MPLS kernel phai ho tro `mpls_router` va `mpls_iptunnel`; neu khong ho tro thi phai cai kernel/module phu hop truoc khi nop.
 
 TASK 1: Kiem tra cau truc project
 
@@ -59,7 +59,7 @@ Cau truc chap nhan hien tai:
 
 Can sua neu thieu:
 - README phai noi ro du lieu do lay tu lenh that trong Mininet.
-- README phai noi ro muc do MPLS: native MPLS neu co, hoac MPLS-like/static route neu chua co kernel MPLS.
+- README phai noi ro mode mac dinh la native MPLS kernel, mode `ip` chi la baseline so sanh.
 - Khong luu mat khau, token, du lieu mau gia.
 
 Tieu chi dat:
@@ -139,14 +139,9 @@ Tieu chi dat:
 - Ping lien chi nhanh thanh cong.
 - Traceroute the hien duong di qua CE/PE/P.
 
-TASK 4: Kiem tra MPLS
+TASK 4: Kiem tra MPLS kernel native
 
-Bat buoc toi thieu cho bai hien tai:
-- Topology va routing phai the hien luu luong di qua mien provider CE/PE/P/P.
-- README va bao cao phai giai thich MPLS, push/swap/pop, PE/P/CE, va han che neu chua chay MPLS native.
-- Khong duoc noi co tcpdump bat duoc MPLS label neu khong co goi MPLS that.
-
-Nang cao neu may ao ho tro Linux MPLS:
+Bat buoc:
 - sudo modprobe mpls_router
 - sudo modprobe mpls_iptunnel
 - sysctl net.mpls.platform_labels
@@ -156,16 +151,20 @@ Nang cao neu may ao ho tro Linux MPLS:
   - ip -f mpls route add <label> as <new-label> via inet <next-hop> dev <interface>
   - ip -f mpls route add <label> via inet <next-hop> dev <interface>
 - Dung tcpdump tren core link de bat goi co ethertype MPLS.
+- P router khong duoc chi dua vao static IP route toi LAN dich trong mode MPLS; P router phai forward bang `ip -f mpls route`.
 
-Can tao neu lam nang cao:
-- code/mpls_kernel_config.py hoac tach rieng module trong code/network_config.py
-- docs/mpls_kernel_setup.md
+Can tao/cap nhat:
+- code/network_config.py
+- code/topology_mininet.py
+- code/performance_test.py
+- docs/mpls_kernel_setup.md neu can giai thich rieng
 - results/mpls_routes.txt
 - results/tcpdump_mpls.txt
 
 Tieu chi dat:
-- Neu la ban hien tai: ghi ro "MPLS-like/static routing qua CE/PE/P, chua phai MPLS native".
-- Neu la ban nang cao: ping lien chi nhanh chay trong MPLS mode va tcpdump thay goi MPLS that.
+- Ping lien chi nhanh chay trong `--mode mpls`.
+- `results/mpls_routes.txt` co route `ip -f mpls route show` tren PE/P.
+- `results/tcpdump_mpls.txt` co goi MPLS that bat tren core link.
 
 TASK 5: Kiem tra do Delay va Packet Loss bang ping that
 
@@ -345,7 +344,7 @@ Hop ly:
 
 Can bo sung/chinh lai:
 - Task cu yeu cau tao project moi metro-mpls-real-measurement, khong hop voi project hien tai nen da bo.
-- Task cu bat buoc Linux kernel MPLS/tcpdump MPLS that; day la muc nang cao, vi project hien tai dang MPLS-like/static routing.
+- Yeu cau moi cua thay bat buoc Linux kernel MPLS/tcpdump MPLS that; project da duoc chuyen sang mode `mpls` native mac dinh.
 - Can thong nhat ten host Branch 3 neu muon dung dung yeu cau "svr1, svr2, svr3, svr4, os1, os2".
 - Da them UDP packet loss tu iperf3 UDP, nhung chua co chuoi nhieu muc tai de ve "packet loss khi tai mang tang".
 - Da them same-branch tests vao benchmark cho lan chay tiep theo.

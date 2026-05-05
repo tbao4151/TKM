@@ -22,11 +22,28 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-apt update
-apt install -y \
-  mininet openvswitch-switch openvswitch-common iperf iperf3 traceroute \
-  net-tools iproute2 python3 python3-pip python3-venv git curl \
-  python3-networkx python3-matplotlib python3-pandas python3-docx
+required_cmds=(mn ovs-vsctl iperf3 traceroute tcpdump python3)
+missing_cmd=0
+for cmd in "${required_cmds[@]}"; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    missing_cmd=1
+  fi
+done
+
+if [[ "$missing_cmd" -eq 1 ]]; then
+  apt update || echo "WARNING: apt update failed for one or more repositories; continuing with apt install"
+  apt install -y \
+    mininet openvswitch-switch openvswitch-common iperf iperf3 traceroute \
+    tcpdump tshark ethtool mtr net-tools iproute2 python3 python3-pip python3-venv \
+    git curl python3-networkx python3-matplotlib python3-pandas python3-docx
+else
+  echo "Required system commands already installed; skipping apt install." | tee -a "$LOG_FILE"
+fi
+
+modprobe mpls_router
+modprobe mpls_iptunnel
+modprobe mpls_gso || true
+sysctl -w net.mpls.platform_labels=100000
 
 if ! python3 - <<'PY'
 import importlib
@@ -43,7 +60,7 @@ fi
 {
   echo
   echo "Command availability:"
-  for cmd in mn ovs-vsctl iperf iperf3 traceroute python3; do
+  for cmd in mn ovs-vsctl iperf iperf3 traceroute tcpdump python3; do
     if command -v "$cmd" >/dev/null 2>&1; then
       echo "OK: $cmd -> $(command -v "$cmd")"
       "$cmd" --version 2>&1 | head -n 1 || true
@@ -51,6 +68,10 @@ fi
       echo "MISSING: $cmd"
     fi
   done
+  echo
+  echo "Linux MPLS kernel status:"
+  lsmod | grep '^mpls' || true
+  sysctl net.mpls.platform_labels || true
   echo
   echo "Python package check:"
   python3 - <<'PY'
