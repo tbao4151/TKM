@@ -9,8 +9,8 @@
 \usetheme{Madrid}
 \usecolortheme{default}
 
-% Customize the frametitle to include the TDTU logo at top left
-\addtobeamertemplate{frametitle}{}{%
+% Overlay logo on ALL frames
+\addtobeamertemplate{headline}{}{%
 \begin{tikzpicture}[remember picture,overlay]
 \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.2cm]{image/logo-tdtu.jpg}};
 \end{tikzpicture}
@@ -19,19 +19,13 @@
 \title[Metro Ethernet MPLS]{Thiết kế và triển khai mạng Metro Ethernet sử dụng MPLS cho kết nối đa chi nhánh doanh nghiệp}
 \author[N.V.T.Bảo]{Nguyễn Văn Thiên Bảo - 52300179}
 \institute[TDTU]{Đại học Tôn Đức Thắng\\Khoa Công nghệ thông tin}
-\date{\today}
+\date{}
 
 \begin{document}
 
-{
-\setbeamertemplate{headline}{} % Hide header on title page to put logo explicitly if needed
 \begin{frame}
-\begin{tikzpicture}[remember picture,overlay]
-\node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.5cm]{image/logo-tdtu.jpg}};
-\end{tikzpicture}
 \titlepage
 \end{frame}
-}
 
 \begin{frame}{Nội dung trình bày}
     \tableofcontents
@@ -211,7 +205,7 @@
 
 \begin{frame}[plain] % Slide trơn không tiêu đề, không đánh số
     \begin{tikzpicture}[remember picture,overlay]
-    \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.5cm]{image/logo-tdtu.jpg}};
+    \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.2cm]{image/logo-tdtu.jpg}};
     \end{tikzpicture}
     \vspace{2cm}
     \centering
