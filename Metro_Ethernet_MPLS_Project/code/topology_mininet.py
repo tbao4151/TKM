@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
 import time
 
@@ -19,7 +20,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR not in sys.path:
     sys.path.insert(0, SCRIPT_DIR)
 
-from network_config import collect_mpls_state, configure_network, connectivity_checks
+from network_config import collect_frr_state, collect_mpls_state, configure_network, connectivity_checks
 
 
 class LinuxRouter(Node):
@@ -67,7 +68,7 @@ class MetroEthernetTopo(Topo):
         self.addLink("b2_core1", "b2_core2", cls=TCLink, bw=100, delay="1ms")
         self.addLink("b2_core1", "b2_ce", cls=TCLink, bw=100, delay="1ms")
 
-        # Branch 3: Leaf-Spine Network - loop-free lab variant for stable OVS startup.
+        # Branch 3: Leaf-Spine Network - loop-free L2 variant for stable OVS startup.
         for host in ("svr1", "svr2", "svr3a", "svr3b", "svr4", "os1", "os2"):
             self.addHost(host)
         self.addSwitch("b3_leaf1", failMode="standalone")
@@ -119,11 +120,25 @@ def build_network(auto_set_macs: bool = True) -> Mininet:
     return net
 
 
-def start_configured_network(mode: str = "mpls", stp_wait: int = 2) -> Mininet:
+def cleanup_stale_mininet() -> None:
+    """Dọn trạng thái Mininet cũ để lần demo mới ổn định hơn."""
+    result = subprocess.run(
+        ["mn", "-c"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        info("*** Warning: mn -c returned non-zero; continuing with fresh build attempt.\n")
+
+
+def start_configured_network(mode: str = "mpls", stp_wait: int = 20, cleanup: bool = True) -> Mininet:
+    if cleanup:
+        cleanup_stale_mininet()
     net = build_network()
     net.start()
     configure_network(net, mode=mode)
-    # Cho OVS STP hoi tu vi topology moi co cac link du phong L2.
+    # Cho switch va namespace on dinh truoc khi chay benchmark.
     time.sleep(stp_wait)
     return net
 
@@ -131,7 +146,7 @@ def start_configured_network(mode: str = "mpls", stp_wait: int = 2) -> Mininet:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Metro Ethernet native MPLS Mininet topology")
     parser.add_argument("--mode", choices=("ip", "mpls"), default="mpls", help="forwarding mode")
-    parser.add_argument("--stp-wait", type=int, default=2, help="seconds to wait after OVS startup")
+    parser.add_argument("--stp-wait", type=int, default=20, help="seconds to wait after OVS/OSPF/LDP startup")
     parser.add_argument("--test-mode", action="store_true", help="start topology, run connectivity checks, stop")
     args = parser.parse_args()
 
@@ -151,10 +166,12 @@ def main() -> int:
             if args.mode == "mpls":
                 info("*** MPLS kernel routes\n")
                 info(collect_mpls_state(net) + "\n")
+                info("*** FRRouting OSPF/LDP control-plane\n")
+                info(collect_frr_state(net) + "\n")
             return 1 if failed else 0
 
         info(f"*** Topology ready in {args.mode} mode. Use Mininet CLI for demo.\n")
-        info("*** Example: host1 ping -c 3 10.2.0.11\n")
+        info("*** Example: host1 ping -c 3 10.2.0.21\n")
         CLI(net)
         return 0
     finally:

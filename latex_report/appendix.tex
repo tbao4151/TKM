@@ -1,0 +1,62 @@
+\section*{PHỤ LỤC: LỆNH DEMO VÀ MÃ NGUỒN CHÍNH}
+\phantomsection\addcontentsline{toc}{section}{\numberline{} PHỤ LỤC}
+
+\subsection*{A. Lệnh chạy toàn bộ project}
+\begin{lstlisting}[language=bash, caption={Chạy pipeline end-to-end}]
+cd Metro_Ethernet_MPLS_Project
+sudo bash code/run_all.sh
+\end{lstlisting}
+
+\subsection*{B. Lệnh kiểm tra MPLS}
+\begin{lstlisting}[language=bash, caption={Kiểm tra route và gói MPLS}]
+cat results/mpls_routes.txt
+cat results/frr_control_plane.txt
+cat results/tcpdump_mpls.txt
+sudo python3 code/topology_mininet.py --mode mpls --test-mode --stp-wait 20
+\end{lstlisting}
+
+\subsection*{C. Demo thu cong khi vao Mininet CLI}
+\begin{lstlisting}[language=bash, caption={Luong demo ngan gon khi giang vien yeu cau thao tac live}]
+sudo python3 code/topology_mininet.py --mode mpls
+# Trong Mininet CLI:
+nodes
+links
+host1 ping -c 3 10.2.0.21
+host2 traceroute -n 10.3.0.11
+exit
+sudo mn -c
+\end{lstlisting}
+
+\subsection*{D. Lệnh chạy từng phép đo tu backend/GUI}
+\begin{lstlisting}[language=bash, caption={Chạy một phép đo theo cặp host}]
+sudo python3 code/performance_test.py --action ping --source-host host1 --destination-host user1 --mode mpls
+sudo python3 code/performance_test.py --action throughput --source-host host1 --destination-host user1 --mode mpls
+sudo python3 code/performance_test.py --action packet-loss --source-host host1 --destination-host user1 --mode mpls
+sudo -v
+python3 code/gui_monitor.py
+\end{lstlisting}
+
+\subsection*{E. Trích mã cấu hình VPLS/L2VPN}
+\begin{lstlisting}[language=Python, caption={Logic CE WAN và GRETAP pseudowire trong network_config.py}]
+for network, gateway in VPLS_CE_ROUTES[ce_name]:
+    run(ce, f"ip route replace {network} via {gateway} dev {intf}")
+
+run(router, f"ip link add {tunnel} type gretap local {local_id} remote {neighbor_id} key 100 ttl 64")
+run(router, f"ip link set {tunnel} master {bridge}")
+run(router, f"ip link set {tunnel} up")
+\end{lstlisting}
+
+\subsection*{F. Trích mã đo UDP load sweep}
+\begin{lstlisting}[language=Python, caption={Các mức tải UDP dùng để đo packet loss}]
+UDP_LOAD_LEVELS = [5, 20, 50, 80, 120]
+
+for bandwidth_mbps in UDP_LOAD_LEVELS:
+    run_iperf3_udp(
+        src,
+        dst,
+        dst_ip,
+        port,
+        bandwidth_mbps=bandwidth_mbps,
+        label="UDP LOAD SWEEP",
+    )
+\end{lstlisting}

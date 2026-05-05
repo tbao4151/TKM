@@ -51,6 +51,10 @@ def add_results_table(doc: Document, df: pd.DataFrame) -> None:
     ]
     if "mode" in df.columns:
         cols.insert(1, "mode")
+    if "test_type" in df.columns:
+        cols.insert(2, "test_type")
+    if "load_mbps" in df.columns:
+        cols.insert(cols.index("source_branch"), "load_mbps")
     if "udp_packet_loss_percent" in df.columns:
         cols.insert(cols.index("note"), "udp_packet_loss_percent")
     table = doc.add_table(rows=1, cols=len(cols))
@@ -60,7 +64,8 @@ def add_results_table(doc: Document, df: pd.DataFrame) -> None:
     for _, row in df.iterrows():
         cells = table.add_row().cells
         for i, col in enumerate(cols):
-            cells[i].text = str(row[col])
+            value = row[col]
+            cells[i].text = "" if pd.isna(value) else str(value)
 
 
 def add_text_excerpt(doc: Document, path: Path, max_lines: int = 28) -> None:
@@ -77,6 +82,8 @@ def add_text_excerpt(doc: Document, path: Path, max_lines: int = 28) -> None:
 
 def main():
     df = ensure_real_results()
+    baseline_df = df[df["test_type"].fillna("baseline") == "baseline"].copy() if "test_type" in df.columns else df.copy()
+    load_sweep_df = df[df["test_type"] == "udp_load_sweep"].copy() if "test_type" in df.columns else pd.DataFrame()
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     doc = Document()
     styles = doc.styles
@@ -143,7 +150,10 @@ def main():
     add_image(doc, "branch2_three_tier.png", "Hinh 3. Branch 2 Three-tier Network.")
 
     add_heading(doc, "8. Kien truc Branch 3 Leaf-Spine Network")
-    doc.add_paragraph("Branch 3 co 4 leaf, 2 spine va CE. Cac leaf ket noi day du den 2 spine; OVS STP duoc bat de topology du phong L2 chay on dinh.")
+    doc.add_paragraph(
+        "Branch 3 co 4 leaf, 2 spine va CE. Trong lab nay topology duoc giu loop-free de OVS khoi dong on dinh, "
+        "tap trung vao kiem thu forwarding/MPLS thay vi hoi tu STP."
+    )
     add_image(doc, "branch3_leaf_spine.png", "Hinh 4. Branch 3 Leaf-Spine Network.")
 
     add_heading(doc, "9. Thiet ke Provider MPLS Backbone")
@@ -160,12 +170,13 @@ def main():
 
     add_heading(doc, "12. Cau hinh dinh tuyen/forwarding")
     doc.add_paragraph(
-        "Mode MPLS su dung Linux kernel MPLS that: PE dau vao push label, P router swap label, egress PE pop label roi chuyen tiep IP ve CE. "
+        "Mode MPLS su dung Linux kernel MPLS that: FRRouting OSPF/LDP tao route loopback PE/P va label dong; traffic CE lien chi nhanh di qua service VPLS/L2VPN. "
+        "Data-plane L2VPN trong Mininet dung full-mesh Linux GRETAP pseudowire co split-horizon/port-isolation tren underlay MPLS de co the kiem chung bang ping va tcpdump. "
         "Bang chung cau hinh nam trong results/mpls_routes.txt va goi MPLS bat bang tcpdump nam trong results/tcpdump_mpls.txt."
     )
 
     add_heading(doc, "12.1 Minh chung bang route MPLS kernel", level=2)
-    doc.add_paragraph("Trich xuat bang route MPLS that tren PE/P. Cac dong `encap mpls` the hien push label tren PE; cac dong `as to` the hien swap label tren P.")
+    doc.add_paragraph("Trich xuat bang route MPLS that tren PE/P. Cac dong `encap mpls`, `proto ldp` va `as to` the hien label switching dong trong backbone.")
     add_text_excerpt(doc, MPLS_ROUTES, max_lines=34)
 
     add_heading(doc, "12.2 Minh chung bang tcpdump va hex dump", level=2)
@@ -176,16 +187,24 @@ def main():
     doc.add_paragraph("Kiem thu dung ping giua Branch1-Branch2, Branch1-Branch3 va Branch2-Branch3. Log chi tiet nam trong results/ping_results.txt.")
 
     add_heading(doc, "14. Do throughput, delay, packet loss, jitter")
-    doc.add_paragraph("Throughput do bang iperf3 TCP, jitter do bang iperf3 UDP, delay va packet loss do bang ping, duong di goi tin do bang traceroute.")
+    doc.add_paragraph(
+        "Throughput do bang iperf3 TCP, jitter co ban do bang iperf3 UDP 10M, delay do bang ping, duong di goi tin do bang traceroute. "
+        "Packet loss khi tai mang tang duoc do bang iperf3 UDP voi cac muc tai 5M, 20M, 50M, 80M va 120M."
+    )
 
     add_heading(doc, "15. Bang ket qua thuc te")
     doc.add_paragraph(f"Thoi gian kiem thu tu results.csv: {df['timestamp'].min()} den {df['timestamp'].max()}.")
-    add_results_table(doc, df)
+    doc.add_paragraph("Bang 1 gom cac phep do baseline giua tung cap host dai dien.")
+    add_results_table(doc, baseline_df)
+    if not load_sweep_df.empty:
+        add_heading(doc, "15.1 Bang packet loss theo muc tai", level=2)
+        doc.add_paragraph("Bang 2 ghi ket qua UDP packet loss sweep khi tang offered load tren cac cap lien chi nhanh.")
+        add_results_table(doc, load_sweep_df)
 
     add_heading(doc, "16. Bieu do so sanh hieu nang")
     add_image(doc, "throughput_chart.png", "Hinh 6. Throughput.")
     add_image(doc, "delay_chart.png", "Hinh 7. Delay trung binh.")
-    add_image(doc, "packet_loss_chart.png", "Hinh 8. Packet loss.")
+    add_image(doc, "packet_loss_chart.png", "Hinh 8. UDP packet loss khi tai mang tang.")
     add_image(doc, "jitter_chart.png", "Hinh 9. Jitter.")
 
     add_heading(doc, "17. Phan tich anh huong cua tung kien truc LAN")
@@ -193,10 +212,11 @@ def main():
         "Flat Network co duong LAN ngan nen de cau hinh. Three-tier co them access/distribution/core nen so hop noi bo nhieu hon. Leaf-Spine tao cau truc hien dai hon cho data center, nhung trong mo hinh nay duong di van bi anh huong boi backbone provider."
     )
 
-    add_heading(doc, "18. Danh gia hoat dong MPLS hoac forwarding tuong duong MPLS")
+    add_heading(doc, "18. Danh gia hoat dong MPLS native")
     doc.add_paragraph(
-        "Project da cau hinh Linux kernel MPLS native trong cac namespace PE/P. Ingress PE dung ip route encap mpls de push label, P router dung ip -f mpls route de swap label, egress PE pop label ve CE. "
-        "Trong lab nay label duoc gan tinh bang Python de de kiem soat va demo; day la LSP tinh, khong phai LDP dong."
+        "Project da cau hinh Linux kernel MPLS native trong cac namespace PE/P. FRRouting OSPF/LDP tao bang route co `proto ospf`, `proto ldp`, `encap mpls` va `show mpls table`. "
+        "Backbone PE/P dong thoi chay FRRouting OSPF/LDP; frr_control_plane.txt co OSPF Full, LDP OPERATIONAL, label binding va show mpls table. "
+        "Luong CE/branch di qua service VPLS/L2VPN; data-plane L2VPN trong Mininet duoc hien thuc bang full-mesh Linux GRETAP pseudowire co split-horizon/port-isolation tren underlay MPLS va co bridge/gretap state trong frr_control_plane.txt."
     )
 
     add_heading(doc, "19. So sanh MPLS voi IP routing truyen thong")

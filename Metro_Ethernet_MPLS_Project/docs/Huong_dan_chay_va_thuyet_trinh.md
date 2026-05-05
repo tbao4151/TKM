@@ -26,7 +26,7 @@ Three-tier chia LAN thanh Access, Distribution va Core. Access noi host, Distrib
 
 ## 6. Leaf-Spine Network
 
-Leaf-Spine la kien truc hay dung trong data center. Host noi vao leaf, leaf noi len spine. Muc tieu la giam nghen va tao duong di dong deu. Trong lab nay topology duoc giu khong tao loop L2 de chay on dinh trong Mininet.
+Leaf-Spine la kien truc hay dung trong data center. Host noi vao leaf, leaf noi len spine. Muc tieu la giam nghen va tao duong di dong deu. Trong lab nay topology duoc giu loop-free o L2 de chay on dinh trong Mininet.
 
 ## 7. Metro Ethernet
 
@@ -80,6 +80,7 @@ sudo python3 code/topology_mininet.py --mode mpls
 sudo python3 code/performance_test.py --mode mpls
 python3 code/plot_results.py
 python3 code/generate_report.py
+sudo -v
 python3 code/gui_monitor.py
 ```
 
@@ -93,15 +94,29 @@ sudo bash code/run_all.sh
 
 `performance_test.py` tu tao topology Mininet, chay test that, luu bang chung MPLS kernel trong `results/mpls_routes.txt` va `results/tcpdump_mpls.txt`, sau do stop topology. Neu muon demo thu cong, chay `sudo python3 code/topology_mininet.py --mode mpls` de vao Mininet CLI.
 
+Script `topology_mininet.py` hien tu goi `mn -c` o dau lan chay de giam rui ro fail do namespace Mininet cu, nhung cleanup thu cong van la thao tac an toan nen giu khi demo.
+
+Trong Mininet CLI de demo thao tac live:
+
+```text
+nodes
+links
+host1 ping -c 3 10.2.0.21
+host2 traceroute -n 10.3.0.11
+exit
+```
+
 ## 16. Cach cleanup Mininet
 
 ```bash
 sudo mn -c
 ```
 
+Nen cleanup sau khi thoat CLI de tranh namespace/interface cu anh huong lan chay sau.
+
 ## 17. Cach doc results.csv
 
-File `results/results.csv` co cac cot: timestamp, mode, source_branch, destination_branch, source_host, destination_host, throughput_mbps, avg_delay_ms, packet_loss_percent, jitter_ms, udp_packet_loss_percent, test_tool, note.
+File `results/results.csv` co cac cot: timestamp, mode, test_type, load_mbps, source_branch, destination_branch, source_host, destination_host, throughput_mbps, avg_delay_ms, packet_loss_percent, jitter_ms, udp_packet_loss_percent, test_tool, note.
 
 ## 18. Cach doc bieu do throughput
 
@@ -113,7 +128,7 @@ Delay la RTT trung binh tu ping. Cot cang thap thi thoi gian phan hoi cang tot.
 
 ## 20. Cach doc packet loss
 
-Packet loss la ti le goi ping bi mat. 0% la tot nhat; gia tri cao cho thay loi ket noi hoac qua tai.
+Packet loss chart duoc ve tu iperf3 UDP load sweep khi tang tai 5M, 20M, 50M, 80M, 120M. 0% la tot nhat; gia tri cao cho thay qua tai hoac loi ket noi. Ping packet loss van duoc luu rieng trong cot `packet_loss_percent` cua baseline.
 
 ## 21. Cach doc jitter
 
@@ -126,10 +141,12 @@ Mo file `report/Bao_cao_Metro_Ethernet_MPLS_Mininet.docx` bang LibreOffice Write
 ## 23. Cach demo GUI
 
 ```bash
+sudo -v
 python3 code/gui_monitor.py
 ```
 
-GUI co cac nut Ping, Traceroute, Throughput, Delay, Packet Loss va Jitter. Cac nut nay goi `sudo python3 code/performance_test.py`, vi vay do la test that trong Mininet, khong phai du lieu mau.
+GUI co cac nut Ping, Traceroute, Throughput, Delay, Packet Loss va Jitter. Moi nut goi dung loai test that trong Mininet cho cap source/destination dang chon, khong doc CSV mau.
+Neu may demo khong co giao dien do hoa, bo qua GUI va dung `performance_test.py --action ...` trong terminal.
 
 ## 24. Checklist truoc khi thuyet trinh
 
@@ -142,6 +159,7 @@ GUI co cac nut Ping, Traceroute, Throughput, Delay, Packet Loss va Jitter. Cac n
 - Bao cao Word da tao.
 - Chay `grep -R` de dam bao khong co mat khau trong project.
 - Chuan bi lenh demo: `sudo python3 code/topology_mininet.py`.
+- Nho cleanup bang `sudo mn -c` sau khi demo CLI.
 
 ## 25. Cau hoi van dap va tra loi mau
 
@@ -194,7 +212,7 @@ Tra loi: iperf3 UDP.
 Tra loi: ping RTT trung binh.
 
 17. Packet loss do bang gi?  
-Tra loi: ping packet loss.
+Tra loi: Packet loss chart chinh duoc do bang iperf3 UDP khi tang tai; baseline ping packet loss van co trong `results.csv`.
 
 18. Traceroute dung de lam gi?  
 Tra loi: Kiem tra duong di goi tin qua CE/PE/P.
@@ -205,8 +223,8 @@ Tra loi: Mininet tao namespace, interface ao va OVS bridge nen can quyen root.
 20. MPLS native co chay khong?  
 Tra loi: Co. Lab load `mpls_router`, `mpls_iptunnel`, cau hinh `ip route encap mpls` tren PE, `ip -f mpls route` tren P/PE, va dung tcpdump bat goi MPLS that tren link core.
 
-21. MPLS-like nghia la gi?  
-Tra loi: La cach mo phong logic neu may khong ho tro kernel MPLS. Ban hien tai uu tien mode `mpls` native; chi dung `--mode ip` lam baseline so sanh.
+21. Mode `ip` dung de lam gi?  
+Tra loi: Day la baseline so sanh voi mode `mpls` native. Ket qua nop/chung minh chinh van la mode `mpls`.
 
 22. File cau hinh route nam dau?  
 Tra loi: `code/network_config.py`.

@@ -1,0 +1,28 @@
+\section{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+
+\subsection{Kết luận}
+
+Project đã xây dựng được mô hình Metro Ethernet kết nối ba chi nhánh doanh nghiệp trên Mininet với ba kiến trúc LAN khác nhau: Flat, Three-tier và Leaf-Spine. Phần backbone nhà cung cấp có đủ vai trò CE, PE và P router; mode \texttt{mpls} chạy Linux kernel MPLS native, có FRRouting OSPF/LDP control-plane và có log kiểm chứng route/label thật trong \texttt{results/mpls\_routes.txt}, \texttt{results/frr\_control\_plane.txt}, \texttt{results/tcpdump\_mpls.txt}.
+
+Về mặt chấm điểm, project hiện đáp ứng các ý chính của rubric:
+\begin{itemize}
+    \item Có báo cáo đúng bố cục 5 chương, có mục lục, danh mục hình, danh mục bảng và phụ lục lệnh demo.
+    \item Có sơ đồ tổng thể, sơ đồ ba chi nhánh, sơ đồ backbone và minh chứng kết quả test thực tế.
+    \item Có giải thích bản chất MPLS, vai trò CE/PE/P, push/swap/pop label và sự khác biệt giữa ba kiến trúc LAN.
+    \item Có benchmark thực tế cho throughput, delay, jitter và packet loss khi tải mạng tăng.
+    \item Có tài liệu hướng dẫn chạy theo rubric và kịch bản thuyết trình để hỗ trợ phần demo và phản biện.
+\end{itemize}
+
+\subsection{Điểm cần trình bày trung thực khi bảo vệ}
+
+Điểm cần nói rõ với giảng viên là project dùng Linux kernel MPLS native để xử lý label thật trên underlay, còn data-plane VPLS/L2VPN trong Mininet được hiện thực bằng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation. FRRouting vẫn chạy OSPF/LDP trong namespace PE/P và có block \texttt{l2vpn type vpls} trong running-config để bám sát rubric, nhưng không nên phát biểu quá mức theo hướng ``native FRR VPLS end-to-end hoàn toàn'' nếu chưa kiểm chứng riêng phần đó.
+
+\subsection{Hướng phát triển}
+
+Nếu tiếp tục mở rộng, project có thể phát triển theo các hướng:
+\begin{itemize}
+    \item Thêm chi nhánh thứ tư hoặc nhiều VRF/service hơn để mô phỏng doanh nghiệp lớn.
+    \item So sánh sâu hơn giữa mode \texttt{ip} và mode \texttt{mpls} trên cùng bộ benchmark.
+    \item Bổ sung cơ chế ECMP, traffic engineering hoặc QoS để tăng điểm phần ``triển khai nghiên cứu''.
+    \item Tự động sinh PDF LaTeX và đóng gói artifact nộp bài trong một script duy nhất.
+\end{itemize}

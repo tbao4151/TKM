@@ -1,0 +1,165 @@
+\section{TRIỂN KHAI, KIỂM THỬ VÀ ĐÁNH GIÁ}
+
+\subsection{Môi trường triển khai}
+
+Project được kiểm thử trên Ubuntu 24.04 với Mininet, Open vSwitch 3.3.4, iperf3 3.16, traceroute, tcpdump và Python 3.12. Linux kernel đã load các module MPLS cần thiết: \texttt{mpls\_router}, \texttt{mpls\_iptunnel}, \texttt{mpls\_gso}. Log môi trường được lưu tại \texttt{results/environment\_check.txt}.
+
+\subsection{Pipeline tự động}
+
+Toàn bộ quy trình có thể chạy bằng một lệnh:
+
+\begin{lstlisting}[language=bash, caption={Lệnh chạy toàn bộ pipeline}]
+cd Metro_Ethernet_MPLS_Project
+sudo bash code/run_all.sh
+\end{lstlisting}
+
+Script thực hiện cleanup Mininet, kiểm tra môi trường, vẽ topology, dựng mạng MPLS, chạy ping/traceroute/iperf3/tcpdump, sinh \texttt{results.csv}, vẽ biểu đồ và tạo báo cáo Word.
+
+\subsection{Cấu hình MPLS kernel native}
+
+MPLS và VPLS/L2VPN được cấu hình trong \texttt{code/network\_config.py}. Backbone PE/P chạy FRRouting OSPF/LDP để sinh route và label động. Các CE dùng WAN chung \texttt{172.16.100.0/24}; PE access interface không giữ IP khách hàng mà được đưa vào bridge VPLS/L2VPN. Data-plane L2VPN trong Mininet dùng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation trên underlay MPLS.
+
+\begin{lstlisting}[language=bash, caption={Ví dụ route MPLS đã sinh trong kết quả}]
+2.2.2.2/32 encap mpls 22 via 172.20.13.2 dev pe1-eth2 proto ospf
+18 as to 19 via inet 172.20.13.1 dev p3-eth0 proto ldp
+gt-pe2: gretap remote 2.2.2.2 key 100 master br-pe1
+\end{lstlisting}
+
+\subsection{Xác minh chuyển nhãn}
+
+Tcpdump trên link core \texttt{p3-eth0} bắt được gói MPLS thật:
+
+\begin{lstlisting}[language=bash, caption={Trích tcpdump MPLS}]
+ethertype MPLS unicast (0x8847), length 102:
+MPLS (label ..., tc 0, [S], ttl ...)
+10.1.0.11 > 10.2.0.21: ICMP echo request
+\end{lstlisting}
+
+Kết quả trên chứng minh gói tin không chỉ đi bằng static IP route thường. Gói đi qua miền provider đã có MPLS shim header, label, TTL và payload ICMP bên trong.
+
+\subsection{Bộ test hiệu năng}
+
+Bộ test gồm hai nhóm:
+\begin{itemize}
+    \item Baseline: ping, traceroute, iperf3 TCP và iperf3 UDP 10M cho các cặp liên chi nhánh và nội bộ chi nhánh.
+    \item UDP load sweep: iperf3 UDP ở 5M, 20M, 50M, 80M, 120M cho ba cặp liên chi nhánh để đo packet loss khi tải tăng.
+\end{itemize}
+
+\subsection{Bảng kết quả baseline}
+
+\begin{table}[H]
+\centering
+\caption{Kết quả baseline từ results/results.csv}
+\begin{tabularx}{\linewidth}{|X|X|r|r|r|r|}
+\hline
+\textbf{Nguồn} & \textbf{Đích} & \textbf{Throughput} & \textbf{Delay} & \textbf{Loss} & \textbf{Jitter} \\
+ & & \textbf{Mbps} & \textbf{ms} & \textbf{\%} & \textbf{ms} \\
+\hline
+Branch1/host1 & Branch2/user1 & 55.074 & 33.240 & 0.000 & 0.196 \\
+\hline
+Branch1/host2 & Branch3/svr1 & 44.692 & 39.768 & 0.000 & 0.157 \\
+\hline
+Branch2/user1 & Branch3/svr2 & 54.623 & 35.537 & 0.000 & 0.410 \\
+\hline
+Branch1/host1 & Branch1/host4 & 94.713 & 6.633 & 0.000 & 0.098 \\
+\hline
+Branch2/admin1 & Branch2/guest1 & 94.057 & 12.954 & 0.000 & 0.118 \\
+\hline
+Branch3/svr1 & Branch3/os1 & 94.397 & 10.932 & 0.000 & 0.286 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Kết quả packet loss khi tải tăng}
+
+Khi tải UDP tăng lên 80M và 120M, packet loss bắt đầu xuất hiện rõ vì offered load vượt hoặc áp sát năng lực các link backbone 50--60 Mbps. Đây là minh chứng đáp ứng yêu cầu ``Packet loss khi tải mạng tăng'' của đề bài.
+
+\begin{table}[H]
+\centering
+\caption{UDP packet loss sweep}
+\begin{tabularx}{\linewidth}{|X|r|r|r|}
+\hline
+\textbf{Cặp đo} & \textbf{Load Mbps} & \textbf{Jitter ms} & \textbf{UDP loss \%} \\
+\hline
+Branch1 host1 -- Branch2 user1 & 5 & 0.137 & 0.000 \\
+Branch1 host1 -- Branch2 user1 & 20 & 0.468 & 0.000 \\
+Branch1 host1 -- Branch2 user1 & 50 & 0.359 & 0.000 \\
+Branch1 host1 -- Branch2 user1 & 80 & 0.292 & 22.432 \\
+Branch1 host1 -- Branch2 user1 & 120 & 0.243 & 47.167 \\
+\hline
+Branch1 host2 -- Branch3 svr1 & 5 & 1.104 & 0.000 \\
+Branch1 host2 -- Branch3 svr1 & 20 & 0.554 & 0.000 \\
+Branch1 host2 -- Branch3 svr1 & 50 & 0.352 & 0.000 \\
+Branch1 host2 -- Branch3 svr1 & 80 & 0.347 & 32.556 \\
+Branch1 host2 -- Branch3 svr1 & 120 & 0.331 & 54.156 \\
+\hline
+Branch2 user1 -- Branch3 svr2 & 5 & 0.126 & 0.000 \\
+Branch2 user1 -- Branch3 svr2 & 20 & 0.101 & 0.000 \\
+Branch2 user1 -- Branch3 svr2 & 50 & 0.233 & 0.000 \\
+Branch2 user1 -- Branch3 svr2 & 80 & 0.298 & 22.507 \\
+Branch2 user1 -- Branch3 svr2 & 120 & 0.291 & 47.165 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Biểu đồ so sánh hiệu năng}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/throughput_chart.png}
+    \caption{Throughput đo bằng iperf3 TCP}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/delay_chart.png}
+    \caption{Delay trung bình đo bằng ping}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/packet_loss_chart.png}
+    \caption{UDP packet loss khi tải mạng tăng}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/jitter_chart.png}
+    \caption{Jitter đo bằng iperf3 UDP}
+\end{figure}
+
+\subsection{Đánh giá ảnh hưởng kiến trúc LAN}
+
+Kết quả cho thấy traffic nội bộ cùng chi nhánh có throughput gần 94--95 Mbps và delay thấp hơn traffic liên chi nhánh. Branch 1 có đường nội bộ ngắn nên delay nội bộ thấp nhất. Branch 2 có thêm các lớp access/distribution/core nên delay nội bộ cao hơn Branch 1. Branch 3 dùng leaf-spine nhưng do lab loop-free và cùng subnet, delay nội bộ vẫn thấp; khi đi liên chi nhánh, yếu tố chi phối chính là backbone provider và đường MPLS.
+
+\subsection{Đánh giá so với IP routing truyền thống}
+
+Mode \texttt{ip} trong project dùng để làm baseline khi cần so sánh. Điểm khác biệt quan trọng của mode \texttt{mpls} là P router không cần static route đến LAN khách hàng; P router forward dựa trên \texttt{ip -f mpls route}. Điều này thể hiện đúng vai trò lõi provider: lõi chuyển tiếp bằng label, biên PE chịu trách nhiệm ánh xạ prefix khách hàng vào LSP.
+
+\subsection{Đối chiếu rubric}
+
+\begin{table}[H]
+\centering
+\caption{Đối chiếu nhanh với rubric}
+\begin{tabularx}{\linewidth}{|l|X|X|}
+\hline
+\textbf{Tiêu chí} & \textbf{Minh chứng trong project} & \textbf{Ghi chú} \\
+\hline
+Hình thức & Báo cáo LaTeX có bìa, mục lục, danh mục hình, bảng, tài liệu tham khảo, phụ lục & Đúng mẫu báo cáo \\
+\hline
+Topology & Có Flat, Three-tier, Leaf-Spine, CE/PE/P backbone & Dựng bằng Mininet \\
+\hline
+MPLS & Có route \texttt{encap mpls}, \texttt{ip -f mpls route}, tcpdump \texttt{0x8847}; OSPF/LDP có log hội tụ & MPLS kernel native + FRRouting control-plane \\
+\hline
+Hiệu năng & Có throughput, delay, jitter, packet loss theo tải tăng & Lấy từ ping và iperf3 thật \\
+\hline
+Minh chứng & Có raw logs ping, traceroute, iperf3, MPLS route, tcpdump & Lưu trong thư mục \texttt{results/} \\
+\hline
+Sáng tạo & Có runner tự động, parser, chart, GUI monitor & Hỗ trợ demo nhanh \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Nhận xét tổng hợp}
+
+Project đã đáp ứng yêu cầu đề bài về Metro Ethernet MPLS và có bằng chứng gói MPLS thật. Phiên bản hiện tại đã thêm FRRouting để chạy OSPF/LDP trong các namespace PE/P; log \texttt{frr\_control\_plane.txt} cho thấy OSPF \texttt{Full/-}, LDP \texttt{OPERATIONAL}, label binding, bảng MPLS do LDP sinh ra, VPLS running-config, bridge member và GRETAP pseudowire. Phần kết luận, lưu ý bảo vệ và hướng phát triển được tách riêng ở Chương V để bám sát rubric 5 chương.

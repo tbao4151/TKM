@@ -1,0 +1,10 @@
+\section*{TÓM TẮT}
+\phantomsection \addcontentsline{toc}{section}{\numberline {} TÓM TẮT}
+
+Báo cáo trình bày quá trình thiết kế và triển khai mô hình mạng Metro Ethernet sử dụng MPLS để kết nối ba chi nhánh doanh nghiệp có kiến trúc LAN khác nhau: Flat Network, Three-tier Network và Leaf-Spine Network. Hệ thống được xây dựng trên Mininet, sử dụng Open vSwitch cho các switch LAN và Linux namespace cho các router CE, PE, P.
+
+Điểm trọng tâm của project là kiểm chứng forwarding MPLS thật trên Linux kernel. Ingress PE thực hiện push label bằng lệnh \texttt{ip route encap mpls}; các P router thực hiện swap label bằng bảng \texttt{ip -f mpls route}; egress PE pop label và chuyển gói về CE. Bằng chứng được lưu trong \texttt{results/mpls\_routes.txt} và \texttt{results/tcpdump\_mpls.txt}, trong đó tcpdump bắt được gói MPLS ethertype \texttt{0x8847} cùng MPLS shim header.
+
+Các chỉ số throughput, delay, packet loss và jitter được đo bằng ping, traceroute và iperf3. Ngoài các phép đo baseline, project có thêm UDP load sweep ở các mức tải 5M, 20M, 50M, 80M và 120M để đánh giá packet loss khi tải mạng tăng. Toàn bộ số liệu trong báo cáo được sinh từ log đo kiểm thực tế, không dùng số liệu giả hoặc số liệu mẫu.
+
+\newpage

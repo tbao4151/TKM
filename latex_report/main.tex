@@ -1,0 +1,66 @@
+% --- KHAI BÁO CLASS ---
+\documentclass{article}
+\usepackage[fontsize=13pt]{scrextend}
+\PassOptionsToPackage{table,xcdraw}{xcolor}
+\input{preamble}
+
+\begin{document}
+	
+	% --- PHẦN BÌA ---
+	\pagenumbering{gobble} 
+	\input{Template/TrangBia}     
+	\input{Template/TrangPhuBia}   
+	
+	% --- PHẦN ĐẦU ---
+	\cleardoublepage               
+	\pagenumbering{roman}          
+	\setcounter{page}{1}           
+	
+	\input{Template/LoiCamOn}
+	\input{Template/CamKet}
+	\input{Template/TomTat} 
+	\input{Template/TomTatTiengAnh}
+	
+	\tableofcontents 
+	\newpage
+	\listoffigures 
+	\newpage
+	\listoftables 
+	\newpage
+	\input{Template/DanhMucVietTat}
+	
+	% --- PHẦN THÂN (NỘI DUNG CHÍNH) ---
+	\newpage     
+	\pagenumbering{arabic}        
+    
+    % Chương 1: Giới thiệu
+	\input{chuongs/chuong1}
+	\newpage
+	
+    % Chương 2: Cơ sở lý thuyết
+	\input{chuongs/chuong2}
+	\newpage
+	
+    % Chương 3: Thiết kế Mô hình
+	\input{chuongs/chuong3}
+	\newpage
+	
+	% Chương 4: Triển khai & Đánh giá
+	\input{chuongs/chuong4}
+	\newpage
+
+    % Chương 5: Kết luận & Hướng phát triển
+	\input{chuongs/chuong5}
+	\newpage
+        
+    % --- PHẦN CUỐI ---
+    \input{appendix}
+    \newpage
+
+    \phantomsection
+    \addcontentsline{toc}{section}{TÀI LIỆU THAM KHẢO}
+    
+    \nocite{*} % <--- QUAN TRỌNG: Lệnh này giúp in toàn bộ danh sách ra
+	\bibliography{tailieuthamkhao}
+
+\end{document}

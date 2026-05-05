@@ -1,0 +1,10 @@
+\section*{\fontsize{16pt}{15pt}\selectfont DESIGN AND IMPLEMENTATION OF A METRO ETHERNET MPLS NETWORK\\FOR MULTI-BRANCH ENTERPRISE CONNECTIVITY\\ABSTRACT}
+\phantomsection \addcontentsline{toc}{section}{\numberline {} ABSTRACT}
+
+This report presents the design and implementation of a Metro Ethernet network using MPLS for connecting three enterprise branches. Each branch uses a different LAN architecture: Flat Network, Three-tier Network, and Leaf-Spine Network. The provider backbone contains CE, PE, and P routers and is emulated on Mininet with Open vSwitch and Linux network namespaces.
+
+The main technical focus is native Linux kernel MPLS forwarding. Ingress PE routers push labels with \texttt{ip route encap mpls}; P routers swap labels using \texttt{ip -f mpls route}; egress PE routers pop labels before forwarding packets back to the customer edge. The implementation is verified through MPLS route tables and tcpdump captures showing MPLS ethertype \texttt{0x8847}.
+
+Performance evaluation is conducted with real measurements from ping, traceroute, iperf3 TCP, iperf3 UDP, and tcpdump. The report includes throughput, delay, jitter, baseline packet loss, and UDP packet loss under increasing offered load. All reported values are generated from actual Mininet test logs and are not sample or simulated numbers.
+
+\newpage

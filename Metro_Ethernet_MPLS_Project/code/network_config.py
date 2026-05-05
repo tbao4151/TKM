@@ -5,13 +5,18 @@ from __future__ import annotations
 
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 
 PROJECT_NOTE = (
-    "Mode mpls dung Linux kernel MPLS that: PE push label, P swap label, "
-    "egress PE pop label ve CE; khong tao du lieu gia."
+    "Mode mpls dung Linux kernel MPLS va FRRouting OSPF/LDP/VPLS: "
+    "CE lien chi nhanh di qua VPLS/L2VPN data-plane tren backbone MPLS; khong tao du lieu gia."
 )
+
+FRR_DIR = Path("/tmp/metro_ethernet_mpls_frr")
+FRR_DAEMON_DIR = Path("/usr/lib/frr")
+VPLS_SERVICE_MTU = 1400
 
 BRANCH_HOSTS: Dict[str, Dict[str, str]] = {
     "host1": {"ip": "10.1.0.11/24", "gw": "10.1.0.1", "branch": "Branch1"},
@@ -113,53 +118,22 @@ STATIC_ROUTES: Dict[str, List[Tuple[str, str]]] = {
     ],
 }
 
-CE_ROUTES: Dict[str, List[Tuple[str, str]]] = {
-    router: routes for router, routes in STATIC_ROUTES.items() if router.endswith("_ce")
+VPLS_CE_WAN: Dict[str, Tuple[str, str]] = {
+    "b1_ce": ("b1_ce-eth1", "172.16.100.1/24"),
+    "b2_ce": ("b2_ce-eth1", "172.16.100.2/24"),
+    "b3_ce": ("b3_ce-eth1", "172.16.100.3/24"),
 }
 
-PE_LOCAL_ROUTES: Dict[str, List[Tuple[str, str]]] = {
-    "pe1": [("10.1.0.0/24", "172.16.1.2")],
-    "pe2": [("10.2.0.0/24", "172.16.2.2")],
-    "pe3": [("10.3.0.0/24", "172.16.3.2")],
+VPLS_CE_ROUTES: Dict[str, List[Tuple[str, str]]] = {
+    "b1_ce": [("10.2.0.0/24", "172.16.100.2"), ("10.3.0.0/24", "172.16.100.3")],
+    "b2_ce": [("10.1.0.0/24", "172.16.100.1"), ("10.3.0.0/24", "172.16.100.3")],
+    "b3_ce": [("10.1.0.0/24", "172.16.100.1"), ("10.2.0.0/24", "172.16.100.2")],
 }
 
-# Ingress PE IP routes that push MPLS labels for remote branch LANs.
-MPLS_PUSH_ROUTES: Dict[str, List[Tuple[str, int, str, str]]] = {
-    "pe1": [
-        ("10.2.0.0/24", 120, "172.20.13.2", "pe1-eth2"),
-        ("10.3.0.0/24", 130, "172.20.11.2", "pe1-eth1"),
-    ],
-    "pe2": [
-        ("10.1.0.0/24", 210, "172.20.23.2", "pe2-eth1"),
-        ("10.3.0.0/24", 230, "172.20.24.2", "pe2-eth2"),
-    ],
-    "pe3": [
-        ("10.1.0.0/24", 310, "172.20.32.2", "pe3-eth1"),
-        ("10.2.0.0/24", 320, "172.20.34.2", "pe3-eth2"),
-    ],
-}
-
-# MPLS label forwarding entries. Entries with out_label=None pop at egress PE.
-MPLS_LABEL_ROUTES: Dict[str, List[Tuple[int, int | None, str, str]]] = {
-    "p3": [
-        (120, 121, "172.20.23.1", "p3-eth1"),  # Branch1 -> Branch2
-        (210, 211, "172.20.13.1", "p3-eth0"),  # Branch2 -> Branch1
-    ],
-    "p1": [
-        (130, 131, "172.20.12.2", "p1-eth1"),  # Branch1 -> Branch3
-        (311, 312, "172.20.11.1", "p1-eth0"),  # Branch3 -> Branch1
-    ],
-    "p2": [
-        (131, 132, "172.20.32.1", "p2-eth0"),  # Branch1 -> Branch3
-        (310, 311, "172.20.12.1", "p2-eth1"),  # Branch3 -> Branch1
-    ],
-    "p4": [
-        (230, 231, "172.20.34.1", "p4-eth1"),  # Branch2 -> Branch3
-        (320, 321, "172.20.24.1", "p4-eth0"),  # Branch3 -> Branch2
-    ],
-    "pe1": [(211, None, "172.16.1.2", "pe1-eth0"), (312, None, "172.16.1.2", "pe1-eth0")],
-    "pe2": [(121, None, "172.16.2.2", "pe2-eth0"), (321, None, "172.16.2.2", "pe2-eth0")],
-    "pe3": [(132, None, "172.16.3.2", "pe3-eth0"), (231, None, "172.16.3.2", "pe3-eth0")],
+FRR_VPLS_ACCESS_INTERFACES: Dict[str, str] = {
+    "pe1": "pe1-eth0",
+    "pe2": "pe2-eth0",
+    "pe3": "pe3-eth0",
 }
 
 SWITCHES = [
@@ -182,6 +156,38 @@ SWITCHES = [
 
 ROUTERS = ["b1_ce", "b2_ce", "b3_ce", "pe1", "pe2", "pe3", "p1", "p2", "p3", "p4"]
 PROVIDER_ROUTERS = ["pe1", "pe2", "pe3", "p1", "p2", "p3", "p4"]
+
+FRR_ROUTER_IDS: Dict[str, str] = {
+    "pe1": "1.1.1.1",
+    "pe2": "2.2.2.2",
+    "pe3": "3.3.3.3",
+    "p1": "11.11.11.11",
+    "p2": "22.22.22.22",
+    "p3": "33.33.33.33",
+    "p4": "44.44.44.44",
+}
+
+FRR_LDP_INTERFACES: Dict[str, List[str]] = {
+    "pe1": ["pe1-eth1", "pe1-eth2"],
+    "pe2": ["pe2-eth1", "pe2-eth2"],
+    "pe3": ["pe3-eth1", "pe3-eth2"],
+    "p1": ["p1-eth0", "p1-eth1"],
+    "p2": ["p2-eth0", "p2-eth1"],
+    "p3": ["p3-eth0", "p3-eth1"],
+    "p4": ["p4-eth0", "p4-eth1"],
+}
+
+FRR_VPLS_NEIGHBORS: Dict[str, List[Tuple[str, str]]] = {
+    "pe1": [("mpw-pe2", FRR_ROUTER_IDS["pe2"]), ("mpw-pe3", FRR_ROUTER_IDS["pe3"])],
+    "pe2": [("mpw-pe1", FRR_ROUTER_IDS["pe1"]), ("mpw-pe3", FRR_ROUTER_IDS["pe3"])],
+    "pe3": [("mpw-pe1", FRR_ROUTER_IDS["pe1"]), ("mpw-pe2", FRR_ROUTER_IDS["pe2"])],
+}
+
+LINUX_VPLS_PSEUDOWIRES: Dict[str, List[Tuple[str, str]]] = {
+    "pe1": [("pe2", FRR_ROUTER_IDS["pe2"]), ("pe3", FRR_ROUTER_IDS["pe3"])],
+    "pe2": [("pe1", FRR_ROUTER_IDS["pe1"]), ("pe3", FRR_ROUTER_IDS["pe3"])],
+    "pe3": [("pe1", FRR_ROUTER_IDS["pe1"]), ("pe2", FRR_ROUTER_IDS["pe2"])],
+}
 
 
 @dataclass(frozen=True)
@@ -214,6 +220,7 @@ def configure_hosts(net) -> None:
         run(host, f"ip addr flush dev {intf}")
         run(host, "ip route flush table main")
         run(host, f"ip addr add {cfg['ip']} dev {intf}")
+        run(host, f"ip link set {intf} mtu {VPLS_SERVICE_MTU}")
         run(host, f"ip link set {intf} up")
         run(host, f"ip route add default via {cfg['gw']}")
 
@@ -239,9 +246,9 @@ def configure_static_routes(net) -> None:
 
 
 def ensure_kernel_mpls_support() -> None:
-    for module in ("mpls_router", "mpls_iptunnel", "mpls_gso"):
+    for module in ("mpls_router", "mpls_iptunnel", "mpls_gso", "ip_gre"):
         result = subprocess.run(["modprobe", module], text=True, capture_output=True)
-        if result.returncode != 0 and module != "mpls_gso":
+        if result.returncode != 0 and module not in {"mpls_gso", "ip_gre"}:
             message = (result.stderr or result.stdout or "").strip()
             raise RuntimeError(f"Khong load duoc kernel module {module}: {message}")
 
@@ -254,30 +261,223 @@ def configure_mpls_sysctl(net) -> None:
             run(router, f"sysctl -w net.mpls.conf.{intf}.input=1")
 
 
-def configure_mpls_routes(net) -> None:
-    for router_name, routes in CE_ROUTES.items():
-        router = net.get(router_name)
-        for network, gateway in routes:
-            run(router, f"ip route replace {network} via {gateway}")
+def configure_vpls_customer_edges(net) -> None:
+    for ce_name, (intf, ip_addr) in VPLS_CE_WAN.items():
+        ce = net.get(ce_name)
+        run(ce, f"ip addr flush dev {intf}")
+        run(ce, f"ip addr add {ip_addr} dev {intf}")
+        run(ce, f"ip link set {intf} mtu {VPLS_SERVICE_MTU}")
+        run(ce, f"ip link set {intf} up")
+        for network, gateway in VPLS_CE_ROUTES[ce_name]:
+            run(ce, f"ip route replace {network} via {gateway} dev {intf}")
 
-    for router_name, routes in PE_LOCAL_ROUTES.items():
-        router = net.get(router_name)
-        for network, gateway in routes:
-            run(router, f"ip route replace {network} via {gateway}")
+    for pe_name, access_intf in FRR_VPLS_ACCESS_INTERFACES.items():
+        pe = net.get(pe_name)
+        run(pe, f"ip addr flush dev {access_intf}")
+        run(pe, f"ip link set {access_intf} mtu {VPLS_SERVICE_MTU}")
+        run(pe, f"ip link set {access_intf} up")
+        run(pe, f"ip link set {access_intf} promisc on")
 
-    for router_name, routes in MPLS_PUSH_ROUTES.items():
-        router = net.get(router_name)
-        for network, label, gateway, dev in routes:
-            run(router, f"ip route replace {network} encap mpls {label} via {gateway} dev {dev}")
 
-    for router_name, routes in MPLS_LABEL_ROUTES.items():
+def ensure_frr_support() -> None:
+    required = ["zebra", "ospfd", "ldpd"]
+    missing = [name for name in required if not (FRR_DAEMON_DIR / name).exists()]
+    if missing:
+        raise RuntimeError(
+            "Thieu FRRouting daemon: "
+            + ", ".join(missing)
+            + ". Hay cai goi frr truoc khi chay mode MPLS voi OSPF/LDP."
+        )
+
+
+def frr_paths(router_name: str) -> Dict[str, Path]:
+    base = FRR_DIR / router_name
+    return {
+        "base": base,
+        "vty": base / "vty",
+        "conf": base / "frr.conf",
+        "zebra_sock": base / "zebra.sock",
+        "ldp_ctl": base / "ldpctl",
+        "zebra_pid": base / "zebra.pid",
+        "ospfd_pid": base / "ospfd.pid",
+        "ldpd_pid": base / "ldpd.pid",
+        "zebra_log": base / "zebra.log",
+        "ospfd_log": base / "ospfd.log",
+        "ldpd_log": base / "ldpd.log",
+    }
+
+
+def provider_network_config(router_name: str) -> str:
+    router_id = FRR_ROUTER_IDS[router_name]
+    lines = [
+        "frr version 8.4",
+        "frr defaults traditional",
+        f"hostname {router_name}",
+        "password zebra",
+        "service integrated-vtysh-config",
+        f"ip router-id {router_id}",
+        "!",
+    ]
+    for intf in FRR_LDP_INTERFACES[router_name]:
+        lines.extend(
+            [
+                f"interface {intf}",
+                " ip ospf network point-to-point",
+                " ip ospf hello-interval 1",
+                " ip ospf dead-interval 4",
+                " mpls enable",
+                "!",
+            ]
+        )
+
+    lines.extend(
+        [
+        "router ospf",
+        f" ospf router-id {router_id}",
+        f" network {router_id}/32 area 0",
+        " network 172.20.0.0/16 area 0",
+        " mpls ldp-sync",
+        "!",
+        "mpls ldp",
+        f" router-id {router_id}",
+        " !",
+        " address-family ipv4",
+        f"  discovery transport-address {router_id}",
+        ]
+    )
+    for intf in FRR_LDP_INTERFACES[router_name]:
+        lines.extend([f"  interface {intf}", "  !"])
+    lines.extend([" exit-address-family", "!", "line vty", "!"])
+
+    if router_name in FRR_VPLS_NEIGHBORS:
+        access_intf = FRR_VPLS_ACCESS_INTERFACES[router_name]
+        lines.extend(
+            [
+                "l2vpn BRANCH-MAN type vpls",
+                f" bridge br-{router_name}",
+                f" member interface {access_intf}",
+                " !",
+            ]
+        )
+        for pseudowire, neighbor_id in FRR_VPLS_NEIGHBORS[router_name]:
+            lines.extend(
+                [
+                    f" member pseudowire {pseudowire}",
+                    f"  neighbor lsr-id {neighbor_id}",
+                    "  pw-id 100",
+                    " !",
+                ]
+            )
+        lines.append("!")
+    return "\n".join(lines) + "\n"
+
+
+def prepare_frr_files(net) -> None:
+    FRR_DIR.mkdir(parents=True, exist_ok=True)
+    FRR_DIR.chmod(0o777)
+    for router_name in PROVIDER_ROUTERS:
+        paths = frr_paths(router_name)
+        paths["base"].mkdir(parents=True, exist_ok=True)
+        paths["vty"].mkdir(parents=True, exist_ok=True)
+        paths["ldp_ctl"].mkdir(parents=True, exist_ok=True)
+        paths["base"].chmod(0o777)
+        paths["vty"].chmod(0o777)
+        paths["ldp_ctl"].chmod(0o777)
+        paths["conf"].write_text(provider_network_config(router_name), encoding="utf-8")
+        paths["conf"].chmod(0o644)
+
         router = net.get(router_name)
-        for in_label, out_label, gateway, dev in routes:
-            run(router, f"ip -f mpls route del {in_label} 2>/dev/null || true")
-            if out_label is None:
-                run(router, f"ip -f mpls route add {in_label} via inet {gateway} dev {dev}")
-            else:
-                run(router, f"ip -f mpls route add {in_label} as {out_label} via inet {gateway} dev {dev}")
+        router_id = FRR_ROUTER_IDS[router_name]
+        run(router, f"ip addr replace {router_id}/32 dev lo")
+        run(router, "ip link set lo up")
+
+        if router_name in FRR_VPLS_NEIGHBORS:
+            access_intf = FRR_VPLS_ACCESS_INTERFACES[router_name]
+            run(router, f"ip link add br-{router_name} type bridge 2>/dev/null || true")
+            run(router, f"ip addr flush dev {access_intf}")
+            run(router, f"ip link set {access_intf} master br-{router_name} 2>/dev/null || true")
+            run(router, f"ip link set br-{router_name} up")
+            run(router, f"ip link set {access_intf} mtu {VPLS_SERVICE_MTU}")
+            run(router, f"ip link set {access_intf} up")
+            run(router, f"ip link set {access_intf} promisc on")
+
+
+def configure_linux_vpls_pseudowires(net) -> None:
+    for router_name, peers in LINUX_VPLS_PSEUDOWIRES.items():
+        router = net.get(router_name)
+        bridge = f"br-{router_name}"
+        local_id = FRR_ROUTER_IDS[router_name]
+        for peer_name, neighbor_id in peers:
+            tunnel = f"gt-{peer_name}"
+            run(router, f"ip link del {tunnel} 2>/dev/null || true")
+            run(
+                router,
+                f"ip link add {tunnel} type gretap local {local_id} remote {neighbor_id} key 100 ttl 64",
+            )
+            run(router, f"ip link set {tunnel} mtu {VPLS_SERVICE_MTU}")
+            run(router, f"ip link set {tunnel} master {bridge}")
+            run(router, f"bridge link set dev {tunnel} isolated on 2>/dev/null || true")
+            run(router, f"ip link set {tunnel} up")
+            run(router, f"ip link set {tunnel} promisc on")
+
+
+def start_frr_daemons(net) -> None:
+    ensure_frr_support()
+    prepare_frr_files(net)
+    for router_name in PROVIDER_ROUTERS:
+        router = net.get(router_name)
+        paths = frr_paths(router_name)
+        run(router, f"pkill -f '/usr/lib/frr/(zebra|ospfd|ldpd).*metro_ethernet_mpls_frr/{router_name}' 2>/dev/null || true")
+        common = f"-f {paths['conf']} --vty_socket {paths['vty']} -A 127.0.0.1"
+        run(
+            router,
+            f"{FRR_DAEMON_DIR / 'zebra'} -d {common} "
+            f"-i {paths['zebra_pid']} -z {paths['zebra_sock']} "
+            f"--log file:{paths['zebra_log']}",
+        )
+        run(
+            router,
+            f"{FRR_DAEMON_DIR / 'ospfd'} -d {common} "
+            f"-i {paths['ospfd_pid']} -z {paths['zebra_sock']} "
+            f"--log file:{paths['ospfd_log']}",
+        )
+        run(
+            router,
+            f"{FRR_DAEMON_DIR / 'ldpd'} -d {common} "
+            f"-i {paths['ldpd_pid']} -z {paths['zebra_sock']} "
+            f"--ctl_socket {paths['ldp_ctl']} --log file:{paths['ldpd_log']}",
+        )
+    configure_linux_vpls_pseudowires(net)
+
+
+def stop_frr_daemons(net) -> None:
+    for router_name in PROVIDER_ROUTERS:
+        router = net.get(router_name)
+        for daemon in ("zebra", "ospfd", "ldpd"):
+            run(router, f"pkill -f '/usr/lib/frr/{daemon}.*metro_ethernet_mpls_frr/{router_name}' 2>/dev/null || true")
+
+
+def vtysh(router, router_name: str, command: str) -> str:
+    paths = frr_paths(router_name)
+    return run(router, f"vtysh --vty_socket {paths['vty']} -c \"{command}\" 2>&1")
+
+
+def collect_frr_state(net) -> str:
+    sections = []
+    for router_name in PROVIDER_ROUTERS:
+        router = net.get(router_name)
+        sections.append(f"===== {router_name}: show ip ospf neighbor =====\n{vtysh(router, router_name, 'show ip ospf neighbor')}")
+        sections.append(f"===== {router_name}: show ip route ospf =====\n{vtysh(router, router_name, 'show ip route ospf')}")
+        sections.append(f"===== {router_name}: show mpls ldp neighbor =====\n{vtysh(router, router_name, 'show mpls ldp neighbor')}")
+        sections.append(f"===== {router_name}: show mpls ldp ipv4 binding =====\n{vtysh(router, router_name, 'show mpls ldp ipv4 binding')}")
+        sections.append(f"===== {router_name}: show mpls table =====\n{vtysh(router, router_name, 'show mpls table')}")
+        if router_name in FRR_VPLS_NEIGHBORS:
+            sections.append(f"===== {router_name}: show running-config l2vpn =====\n{vtysh(router, router_name, 'show running-config')}")
+            bridge_output = run(router, f"bridge link show master br-{router_name}")
+            gretap_output = run(router, "ip -d link show type gretap")
+            sections.append(f"===== {router_name}: linux bridge vpls data-plane =====\n{bridge_output}")
+            sections.append(f"===== {router_name}: linux gretap pseudowires =====\n{gretap_output}")
+    return "\n".join(sections)
 
 
 def configure_switching(net) -> None:
@@ -297,7 +497,8 @@ def configure_network(net, mode: str = "mpls") -> None:
     elif mode == "mpls":
         ensure_kernel_mpls_support()
         configure_mpls_sysctl(net)
-        configure_mpls_routes(net)
+        configure_vpls_customer_edges(net)
+        start_frr_daemons(net)
     else:
         raise ValueError(f"Unknown network mode: {mode}")
 

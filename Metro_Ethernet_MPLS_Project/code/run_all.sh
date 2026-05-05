@@ -32,6 +32,7 @@ required_files=(
   "results/iperf_results.txt"
   "results/traceroute_results.txt"
   "results/mpls_routes.txt"
+  "results/frr_control_plane.txt"
   "results/tcpdump_mpls.txt"
   "images/topology_overview.png"
   "output/so_do_tong_hop.png"
