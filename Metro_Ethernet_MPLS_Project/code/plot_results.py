@@ -48,7 +48,9 @@ def main():
     df = load_results()
     bar_chart(df, "throughput_mbps", "Throughput (Mbps)", "Throughput do bang iperf3 TCP", "throughput_chart.png", "#4aa3df")
     bar_chart(df, "avg_delay_ms", "Delay trung binh (ms)", "Delay trung binh do bang ping", "delay_chart.png", "#f2b84b")
-    bar_chart(df, "packet_loss_percent", "Packet loss (%)", "Ti le mat goi do bang ping", "packet_loss_chart.png", "#e86f61")
+    loss_column = "udp_packet_loss_percent" if "udp_packet_loss_percent" in df.columns else "packet_loss_percent"
+    loss_title = "UDP packet loss do bang iperf3" if loss_column == "udp_packet_loss_percent" else "Ti le mat goi do bang ping"
+    bar_chart(df, loss_column, "Packet loss (%)", loss_title, "packet_loss_chart.png", "#e86f61")
     bar_chart(df, "jitter_ms", "Jitter (ms)", "Jitter do bang iperf3 UDP", "jitter_chart.png", "#7cc36b")
     print(f"Charts saved to {IMAGE_DIR}")
 

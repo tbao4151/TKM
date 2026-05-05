@@ -40,6 +40,7 @@ CSV_FIELDS = [
     "avg_delay_ms",
     "packet_loss_percent",
     "jitter_ms",
+    "udp_packet_loss_percent",
     "test_tool",
     "note",
 ]
@@ -79,14 +80,19 @@ def parse_iperf_tcp(json_text: str) -> Optional[float]:
     return round(float(bps) / 1_000_000, 3) if bps is not None else None
 
 
-def parse_iperf_udp(json_text: str) -> Optional[float]:
+def parse_iperf_udp(json_text: str) -> Tuple[Optional[float], Optional[float]]:
     data = json.loads(json_text)
     udp_sum = data.get("end", {}).get("sum")
     if not udp_sum:
         streams = data.get("end", {}).get("streams", [])
         udp_sum = streams[0].get("udp") if streams else None
-    jitter = udp_sum.get("jitter_ms") if udp_sum else None
-    return round(float(jitter), 3) if jitter is not None and math.isfinite(float(jitter)) else None
+    if not udp_sum:
+        return None, None
+    jitter = udp_sum.get("jitter_ms")
+    loss = udp_sum.get("lost_percent")
+    parsed_jitter = round(float(jitter), 3) if jitter is not None and math.isfinite(float(jitter)) else None
+    parsed_loss = round(float(loss), 3) if loss is not None and math.isfinite(float(loss)) else None
+    return parsed_jitter, parsed_loss
 
 
 def run_ping(src, dst_ip: str) -> Tuple[Optional[float], Optional[float], str]:
@@ -125,7 +131,7 @@ def run_iperf3_tcp(src, dst, dst_ip: str, port: int) -> Tuple[Optional[float], s
         return None, f"{output}\nPARSE_ERROR: {exc}"
 
 
-def run_iperf3_udp_jitter(src, dst, dst_ip: str, port: int) -> Tuple[Optional[float], str]:
+def run_iperf3_udp_jitter(src, dst, dst_ip: str, port: int) -> Tuple[Optional[float], Optional[float], str]:
     dst.cmd("pkill -f 'iperf3 -s' || true")
     server_cmd = f"timeout {IPERF_SERVER_TIMEOUT_SECONDS}s iperf3 -s -1 -p {port}"
     client_cmd = f"timeout {IPERF_CLIENT_TIMEOUT_SECONDS}s iperf3 -u -b 10M -c {dst_ip} -p {port} -t 5 -J"
@@ -139,9 +145,10 @@ def run_iperf3_udp_jitter(src, dst, dst_ip: str, port: int) -> Tuple[Optional[fl
         f"\n===== UDP JITTER {src.name} -> {dst.name} ({dst_ip}) =====\nCLIENT:\n{output}\nSERVER:\n{server_output}",
     )
     try:
-        return parse_iperf_udp(output), output
+        jitter, udp_loss = parse_iperf_udp(output)
+        return jitter, udp_loss, output
     except Exception as exc:
-        return None, f"{output}\nPARSE_ERROR: {exc}"
+        return None, None, f"{output}\nPARSE_ERROR: {exc}"
 
 
 def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
@@ -157,11 +164,13 @@ def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
     notes = []
     throughput = None
     jitter = None
+    udp_loss = None
     if loss is None:
         notes.append("ping_parse_failed")
     if loss is None or loss >= 100:
         throughput = 0.0
         jitter = 0.0
+        udp_loss = 100.0
         notes.append("ping_failed_or_timed_out; iperf_skipped")
     else:
         progress(f"Running iperf3 TCP for {pair.source_host} -> {pair.destination_host}")
@@ -170,10 +179,13 @@ def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
             throughput = 0.0
             notes.append("iperf_tcp_failed")
         progress(f"Running iperf3 UDP jitter for {pair.source_host} -> {pair.destination_host}")
-        jitter, udp_output = run_iperf3_udp_jitter(src, dst, dst_ip, port_base + 100)
+        jitter, udp_loss, udp_output = run_iperf3_udp_jitter(src, dst, dst_ip, port_base + 100)
         if jitter is None:
             jitter = 0.0
             notes.append("iperf_udp_jitter_failed")
+        if udp_loss is None:
+            udp_loss = 0.0
+            notes.append("iperf_udp_loss_parse_failed")
 
     if "traceroute to" not in traceroute_output:
         notes.append("traceroute_failed")
@@ -192,6 +204,7 @@ def row_for_pair(net, pair: TestPair, port_base: int) -> Dict[str, object]:
         "avg_delay_ms": avg_delay if avg_delay is not None else 0.0,
         "packet_loss_percent": loss if loss is not None else 100.0,
         "jitter_ms": jitter if jitter is not None else 0.0,
+        "udp_packet_loss_percent": udp_loss if udp_loss is not None else 0.0,
         "test_tool": "ping; iperf3 TCP; iperf3 UDP; traceroute",
         "note": "; ".join(notes),
     }

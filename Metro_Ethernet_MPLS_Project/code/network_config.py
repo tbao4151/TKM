@@ -162,6 +162,9 @@ TEST_PAIRS: List[TestPair] = [
     TestPair("Branch1", "Branch2", "host1", "user1"),
     TestPair("Branch1", "Branch3", "host2", "svr1"),
     TestPair("Branch2", "Branch3", "user1", "svr2"),
+    TestPair("Branch1", "Branch1", "host1", "host4"),
+    TestPair("Branch2", "Branch2", "admin1", "guest1"),
+    TestPair("Branch3", "Branch3", "svr1", "os1"),
 ]
 
 

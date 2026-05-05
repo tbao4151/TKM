@@ -1,4 +1,7 @@
-timestamp,source_branch,destination_branch,source_host,destination_host,throughput_mbps,avg_delay_ms,packet_loss_percent,jitter_ms,test_tool,note
-2026-05-03T19:51:08,Branch1,Branch2,host1,user1,55.459,33.367,0.0,0.11,ping; iperf3 TCP; iperf3 UDP; traceroute,success
-2026-05-03T19:51:26,Branch1,Branch3,host2,svr1,45.882,39.749,0.0,0.15,ping; iperf3 TCP; iperf3 UDP; traceroute,success
-2026-05-03T19:51:44,Branch2,Branch3,user1,svr2,55.139,36.376,0.0,0.56,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+timestamp,source_branch,destination_branch,source_host,destination_host,throughput_mbps,avg_delay_ms,packet_loss_percent,jitter_ms,udp_packet_loss_percent,test_tool,note
+2026-05-05T14:55:42,Branch1,Branch2,host1,user1,55.201,34.14,0.0,0.093,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+2026-05-05T14:56:01,Branch1,Branch3,host2,svr1,45.553,44.234,0.0,0.166,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+2026-05-05T14:56:19,Branch2,Branch3,user1,svr2,55.335,36.077,0.0,0.161,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+2026-05-05T14:56:38,Branch1,Branch1,host1,host4,94.882,7.026,0.0,0.08,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+2026-05-05T14:56:55,Branch2,Branch2,admin1,guest1,94.78,8.827,0.0,0.105,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success
+2026-05-05T14:57:13,Branch3,Branch3,svr1,os1,94.893,8.83,0.0,0.119,0.0,ping; iperf3 TCP; iperf3 UDP; traceroute,success

@@ -1,0 +1,351 @@
+KE HOACH KIEM TRA VA HOAN THIEN PROJECT CUOI KY
+
+Pham vi:
+- Project hien tai: Metro_Ethernet_MPLS_Project
+- De bai: thiet ke va trien khai mang Metro Ethernet su dung MPLS ket noi da chi nhanh doanh nghiep tren Mininet.
+- Muc tieu bat buoc: co topology Mininet, CE/PE/P/backbone, 3 kien truc LAN khac nhau, kiem thu ket noi, do Throughput/Delay/Packet loss/Jitter, co bieu do, phan tich va bao cao Word.
+- Muc tieu nang cao: chay MPLS label switching that bang Linux kernel MPLS neu may ao ho tro. Neu khong ho tro thi phai ghi ro han che, khong duoc tu nhan da co MPLS native.
+
+TASK 0: Kiem tra moi truong Ubuntu/Mininet
+
+Can co:
+- mininet
+- openvswitch-switch
+- iproute2
+- iperf3
+- traceroute
+- tcpdump
+- tshark hoac wireshark-cli neu co
+- python3, python3-pip, python3-venv
+- graphviz
+- python packages trong requirements.txt
+
+Lenh kiem tra:
+- lsb_release -a
+- uname -a
+- mn --version
+- ovs-vsctl --version
+- iperf3 --version
+- python3 --version
+- sudo mn --test pingall
+- sudo mn -c
+
+Can tao/cap nhat:
+- Metro_Ethernet_MPLS_Project/results/environment_check.txt
+
+Tieu chi dat:
+- Mininet va OVS chay duoc.
+- iperf3, ping, traceroute co that.
+- Neu MPLS kernel khong ho tro, ghi ro trong README/bao cao la han che.
+
+TASK 1: Kiem tra cau truc project
+
+Cau truc chap nhan hien tai:
+- README.md
+- requirements.txt
+- code/install_environment.sh
+- code/run_all.sh
+- code/topology_mininet.py
+- code/network_config.py
+- code/performance_test.py
+- code/plot_results.py
+- code/generate_report.py
+- code/gui_monitor.py
+- docs/Huong_dan_chay_va_thuyet_trinh.md
+- images/
+- output/
+- results/
+- report/Bao_cao_Metro_Ethernet_MPLS_Mininet.docx
+
+Can sua neu thieu:
+- README phai noi ro du lieu do lay tu lenh that trong Mininet.
+- README phai noi ro muc do MPLS: native MPLS neu co, hoac MPLS-like/static route neu chua co kernel MPLS.
+- Khong luu mat khau, token, du lieu mau gia.
+
+Tieu chi dat:
+- Chay mot lenh duoc pipeline: sudo bash code/run_all.sh
+- Ket qua sinh ra co CSV, log raw, bieu do va file Word.
+
+TASK 2: Kiem tra topology Mininet
+
+Yeu cau theo de:
+- Branch 1: Flat Network.
+- Branch 2: Core - Distribution - Access.
+- Branch 3: Leaf - Spine.
+- ISP backbone: CE, PE, P router.
+- Tat ca router la Linux node co ip_forward=1.
+- Switch LAN la OVS.
+- Link co TCLink de dieu khien bw/delay.
+
+Doi chieu file:
+- code/topology_mininet.py
+
+Can kiem tra/sua:
+- Ten host trong code, README, huong dan, bieu do va test phai thong nhat.
+- Branch 3 nen dung ten ro rang: svr1, svr2, svr3, svr4, os1, os2. Neu giu svr3a/svr3b thi tai lieu phai giai thich.
+- Bang thong/tre tren link nen khop tai lieu:
+  - LAN/access: 100 Mbps, 1 ms
+  - CE-PE: 50-80 Mbps, 2-3 ms
+  - backbone/core: 50-100 Mbps, 3-4 ms
+
+Lenh kiem tra:
+- sudo mn -c
+- sudo python3 code/topology_mininet.py --test-mode
+- Trong CLI: nodes, links, net
+
+Can luu:
+- results/topology_check.txt hoac results/command_history.txt
+
+Tieu chi dat:
+- Mininet start duoc.
+- Tat ca host/router/switch xuat hien.
+- Host ping duoc gateway CE noi bo.
+- Ping lien chi nhanh qua CE -> PE -> P -> PE -> CE dat.
+
+TASK 3: Kiem tra IP addressing va static routing baseline
+
+Yeu cau:
+- Host co IP va default gateway.
+- CE, PE, P co IP tren tung interface.
+- CE/PE/P bat net.ipv4.ip_forward=1.
+- Co route that bang lenh ip route.
+- Khong mock ket qua ping.
+
+Doi chieu file:
+- code/network_config.py
+
+Cap IP hien tai:
+- Branch 1: 10.1.0.0/24
+- Branch 2: 10.2.0.0/24
+- Branch 3: 10.3.0.0/24
+- CE-PE va backbone: 172.16.0.0/30, 172.20.0.0/30
+
+Ghi chu:
+- Cap IP hien tai khac goi y 192.168.x.x trong ban task cu, nhung van hop ly voi de bai vi de khong bat buoc subnet cu the.
+
+Lenh kiem tra trong Mininet:
+- host1 ping -c 5 10.2.0.11
+- host1 ping -c 5 10.3.0.11
+- user1 ping -c 5 10.3.0.21
+- admin1 ping -c 5 10.2.0.31
+- host1 traceroute -n 10.3.0.11
+
+Can luu:
+- results/ping_results.txt
+- results/traceroute_results.txt
+- results/command_history.txt
+
+Tieu chi dat:
+- Ping lien chi nhanh thanh cong.
+- Traceroute the hien duong di qua CE/PE/P.
+
+TASK 4: Kiem tra MPLS
+
+Bat buoc toi thieu cho bai hien tai:
+- Topology va routing phai the hien luu luong di qua mien provider CE/PE/P/P.
+- README va bao cao phai giai thich MPLS, push/swap/pop, PE/P/CE, va han che neu chua chay MPLS native.
+- Khong duoc noi co tcpdump bat duoc MPLS label neu khong co goi MPLS that.
+
+Nang cao neu may ao ho tro Linux MPLS:
+- sudo modprobe mpls_router
+- sudo modprobe mpls_iptunnel
+- sysctl net.mpls.platform_labels
+- Bat net.mpls.conf.<interface>.input=1 tren interface PE/P.
+- Cau hinh route MPLS that bang:
+  - ip route add <prefix> encap mpls <label> via inet <next-hop> dev <interface>
+  - ip -f mpls route add <label> as <new-label> via inet <next-hop> dev <interface>
+  - ip -f mpls route add <label> via inet <next-hop> dev <interface>
+- Dung tcpdump tren core link de bat goi co ethertype MPLS.
+
+Can tao neu lam nang cao:
+- code/mpls_kernel_config.py hoac tach rieng module trong code/network_config.py
+- docs/mpls_kernel_setup.md
+- results/mpls_routes.txt
+- results/tcpdump_mpls.txt
+
+Tieu chi dat:
+- Neu la ban hien tai: ghi ro "MPLS-like/static routing qua CE/PE/P, chua phai MPLS native".
+- Neu la ban nang cao: ping lien chi nhanh chay trong MPLS mode va tcpdump thay goi MPLS that.
+
+TASK 5: Kiem tra do Delay va Packet Loss bang ping that
+
+Yeu cau:
+- Chay ping that trong namespace host Mininet.
+- Parse packet loss va avg RTT tu stdout that.
+- Log raw output.
+
+Doi chieu file:
+- code/performance_test.py
+
+Cap test nen co:
+- Branch 1 -> Branch 2: host1 -> user1 hoac admin1
+- Branch 1 -> Branch 3: host2 -> svr1
+- Branch 2 -> Branch 3: user1 -> svr2
+- Same branch: admin1 -> guest1, svr1 -> os1, host1 -> host4 neu can so sanh noi bo.
+
+Can sua neu thieu:
+- Da them same-branch tests vao code/network_config.py de phan tich anh huong kien truc LAN noi bo ro hon.
+- CSV nen co cot note/status de biet test thanh cong hay loi.
+
+Tieu chi dat:
+- results/ping_results.txt co raw ping.
+- results/results.csv co avg_delay_ms va packet_loss_percent lay tu ping.
+
+TASK 6: Kiem tra Throughput bang iperf3 TCP that
+
+Yeu cau:
+- Start iperf3 server tren host dich.
+- Chay iperf3 client tren host nguon.
+- Parse throughput tu output JSON neu co.
+- Ghi raw output.
+- Neu fail thi ghi note fail, khong dien so dep gia.
+
+Doi chieu file:
+- code/performance_test.py
+
+Tieu chi dat:
+- results/iperf_results.txt co output iperf3.
+- results/results.csv co throughput_mbps.
+
+TASK 7: Kiem tra Jitter va UDP loss bang iperf3 UDP
+
+Yeu cau:
+- Chay iperf3 UDP that.
+- Parse jitter_ms tu output iperf3.
+- Neu muon do packet loss khi tai tang, can them nhieu muc bandwidth: 5M, 20M, 50M, 80M, 120M.
+
+Can sua neu thieu:
+- Da bo sung parse UDP packet loss vao cot udp_packet_loss_percent trong code/performance_test.py.
+- Van nen them nhieu muc bandwidth va cot test_type/mode neu muon so sanh IP vs MPLS va packet loss khi tai tang that ro.
+
+Tieu chi dat:
+- Jitter lay tu iperf3 UDP.
+- Packet loss duoc lay tu iperf3 UDP hoac ping, phai ghi ro nguon so lieu.
+
+TASK 8: Kiem tra benchmark runner
+
+Yeu cau:
+- Mot lenh chay het: sudo bash code/run_all.sh
+- Tu cleanup Mininet.
+- Ve topology.
+- Chay kiem thu.
+- Tao chart.
+- Tao bao cao Word.
+- Dung khi thieu file dau vao quan trong.
+
+Doi chieu file:
+- code/run_all.sh
+- code/performance_test.py
+- code/plot_results.py
+- code/generate_report.py
+
+Tieu chi dat:
+- results/results.csv khong rong.
+- results/*.txt co log raw.
+- images/*_chart.png co du lieu moi.
+- report/Bao_cao_Metro_Ethernet_MPLS_Mininet.docx ton tai va khong rong.
+
+TASK 9: Kiem tra GUI
+
+Yeu cau:
+- GUI mo duoc.
+- Co chon source/destination.
+- Co nut Ping, Throughput, Delay/Packet Loss/Jitter hoac nut chay test.
+- Hien thi output that/log that.
+- Khong chi doc CSV mau.
+
+Doi chieu file:
+- code/gui_monitor.py
+
+Tieu chi dat:
+- python3 code/gui_monitor.py mo cua so neu may co GUI/display.
+- Neu khong co display, README/huong dan can ghi cach chay tren VM co desktop.
+
+TASK 10: Kiem tra bieu do
+
+Yeu cau theo de:
+- Throughput giua cac chi nhanh.
+- Do tre khi truyen du lieu.
+- Packet loss khi tai tang.
+- Jitter.
+- Phan tich anh huong kien truc LAN.
+
+Doi chieu file:
+- code/plot_results.py
+- images/throughput_chart.png
+- images/delay_chart.png
+- images/packet_loss_chart.png
+- images/jitter_chart.png
+
+Can sua neu thieu:
+- Neu chua co UDP loss theo tai tang, packet loss chart hien tai chi la ping loss, can ghi ro.
+- Nen them chart/phan tich same-branch vs cross-branch neu can nhan manh anh huong LAN.
+
+Tieu chi dat:
+- Chart chi sinh tu results/results.csv.
+- Khong tao sample data.
+
+TASK 11: Kiem tra bao cao Word va tai lieu thuyet trinh
+
+Yeu cau theo de:
+- Kien truc Metro Ethernet MAN.
+- Nguyen ly MPLS label switching.
+- Cau hinh P/PE/CE.
+- Ket noi 3 chi nhanh.
+- Mo phong Mininet.
+- Bang thong ke Throughput, Delay, Packet loss, Jitter.
+- Do thi so sanh.
+- Phan tich anh huong Flat/Three-tier/Leaf-Spine.
+- Danh gia MPLS so voi IP routing truyen thong.
+- File Word co hinh anh can thiet.
+
+Doi chieu file:
+- code/generate_report.py
+- docs/Huong_dan_chay_va_thuyet_trinh.md
+- report/Bao_cao_Metro_Ethernet_MPLS_Mininet.docx
+
+Can sua neu thieu:
+- Neu chua co MPLS native, phan danh gia phai noi ro day la MPLS-like/static routing va neu can diem cao hon thi lam them Task 4 nang cao.
+- Bao cao khong duoc tu tao so lieu neu CSV trong.
+
+Tieu chi dat:
+- Word report sinh tu ket qua co that.
+- Tai lieu thuyet trinh co cau hoi van dap va lenh demo.
+
+TASK 12: Kiem tra khong co du lieu gia/placeholder
+
+Lenh kiem tra:
+- grep -Rni "fake\|mock\|sample data\|placeholder\|random" Metro_Ethernet_MPLS_Project
+
+Chap nhan:
+- Cac tu tren chi duoc xuat hien trong canh bao/documentation noi rang khong dung du lieu gia.
+
+Khong chap nhan:
+- Script tu sinh throughput/delay/loss bang random.
+- CSV co so lieu mau khi chua chay Mininet.
+- Bao cao chen so lieu tu code hard-code.
+
+TASK 13: Day GitHub sau khi kiem tra
+
+Lenh:
+- git status --short --branch
+- git add task_plane.txt Metro_Ethernet_MPLS_Project
+- git commit -m "Review and align project task plan"
+- git push
+
+Ghi chu:
+- Chi commit khi da chac cac thay doi la mong muon.
+- Hien tai co the co file bi xoa ngoai pham vi project; can kiem tra truoc khi add de tranh commit nham.
+
+KET LUAN DANH GIA HIEN TAI
+
+Hop ly:
+- Project da co dung chu de, 3 chi nhanh, CE/PE/P/P backbone, Mininet, ping/iperf/traceroute, chart, Word report va huong dan thuyet trinh.
+- Du lieu do duoc thiet ke lay tu lenh that trong Mininet, khong phai so lieu random.
+
+Can bo sung/chinh lai:
+- Task cu yeu cau tao project moi metro-mpls-real-measurement, khong hop voi project hien tai nen da bo.
+- Task cu bat buoc Linux kernel MPLS/tcpdump MPLS that; day la muc nang cao, vi project hien tai dang MPLS-like/static routing.
+- Can thong nhat ten host Branch 3 neu muon dung dung yeu cau "svr1, svr2, svr3, svr4, os1, os2".
+- Da them UDP packet loss tu iperf3 UDP, nhung chua co chuoi nhieu muc tai de ve "packet loss khi tai mang tang".
+- Da them same-branch tests vao benchmark cho lan chay tiep theo.

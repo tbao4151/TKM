@@ -47,6 +47,8 @@ def add_results_table(doc: Document, df: pd.DataFrame) -> None:
         "timestamp", "source_branch", "destination_branch", "source_host", "destination_host",
         "throughput_mbps", "avg_delay_ms", "packet_loss_percent", "jitter_ms", "note",
     ]
+    if "udp_packet_loss_percent" in df.columns:
+        cols.insert(cols.index("note"), "udp_packet_loss_percent")
     table = doc.add_table(rows=1, cols=len(cols))
     table.style = "Table Grid"
     for i, col in enumerate(cols):

@@ -1,2 +1,68 @@
-Test run started: 2026-05-03T20:00:01
-2026-05-03T20:00:01 | Starting Mininet topology for real performance tests
+Test run started: 2026-05-05T14:54:35
+2026-05-05T14:54:35 | Starting Mininet topology for real performance tests
+2026-05-05T14:55:36 | Topology started and configured; running precheck pings
+2026-05-05T14:55:42 | Precheck host1 -> user1: OK
+2026-05-05T14:55:42 | Precheck host2 -> svr1: OK
+2026-05-05T14:55:42 | Precheck user1 -> svr2: OK
+2026-05-05T14:55:42 | Precheck host1 -> host4: OK
+2026-05-05T14:55:42 | Precheck admin1 -> guest1: OK
+2026-05-05T14:55:42 | Precheck svr1 -> os1: OK
+2026-05-05T14:55:42 | Testing Branch1 -> Branch2: host1 -> user1
+2026-05-05T14:55:42 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
+2026-05-05T14:55:50 | host1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.21
+2026-05-05T14:55:50 | Running iperf3 TCP for host1 -> user1
+2026-05-05T14:55:50 | user1: timeout 25s iperf3 -s -1 -p 5201
+2026-05-05T14:55:50 | host1: timeout 18s iperf3 -c 10.2.0.21 -p 5201 -t 5 -J
+2026-05-05T14:55:56 | Running iperf3 UDP jitter for host1 -> user1
+2026-05-05T14:55:56 | user1: timeout 25s iperf3 -s -1 -p 5301
+2026-05-05T14:55:56 | host1: timeout 18s iperf3 -u -b 10M -c 10.2.0.21 -p 5301 -t 5 -J
+2026-05-05T14:56:01 | Testing Branch1 -> Branch3: host2 -> svr1
+2026-05-05T14:56:01 | host2: timeout 25s ping -c 8 -W 2 10.3.0.11
+2026-05-05T14:56:08 | host2: timeout 20s traceroute -n -w 2 -q 1 10.3.0.11
+2026-05-05T14:56:08 | Running iperf3 TCP for host2 -> svr1
+2026-05-05T14:56:08 | svr1: timeout 25s iperf3 -s -1 -p 5202
+2026-05-05T14:56:08 | host2: timeout 18s iperf3 -c 10.3.0.11 -p 5202 -t 5 -J
+2026-05-05T14:56:14 | Running iperf3 UDP jitter for host2 -> svr1
+2026-05-05T14:56:14 | svr1: timeout 25s iperf3 -s -1 -p 5302
+2026-05-05T14:56:14 | host2: timeout 18s iperf3 -u -b 10M -c 10.3.0.11 -p 5302 -t 5 -J
+2026-05-05T14:56:19 | Testing Branch2 -> Branch3: user1 -> svr2
+2026-05-05T14:56:19 | user1: timeout 25s ping -c 8 -W 2 10.3.0.12
+2026-05-05T14:56:26 | user1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.12
+2026-05-05T14:56:26 | Running iperf3 TCP for user1 -> svr2
+2026-05-05T14:56:26 | svr2: timeout 25s iperf3 -s -1 -p 5203
+2026-05-05T14:56:26 | user1: timeout 18s iperf3 -c 10.3.0.12 -p 5203 -t 5 -J
+2026-05-05T14:56:32 | Running iperf3 UDP jitter for user1 -> svr2
+2026-05-05T14:56:32 | svr2: timeout 25s iperf3 -s -1 -p 5303
+2026-05-05T14:56:32 | user1: timeout 18s iperf3 -u -b 10M -c 10.3.0.12 -p 5303 -t 5 -J
+2026-05-05T14:56:38 | Testing Branch1 -> Branch1: host1 -> host4
+2026-05-05T14:56:38 | host1: timeout 25s ping -c 8 -W 2 10.1.0.14
+2026-05-05T14:56:45 | host1: timeout 20s traceroute -n -w 2 -q 1 10.1.0.14
+2026-05-05T14:56:45 | Running iperf3 TCP for host1 -> host4
+2026-05-05T14:56:45 | host4: timeout 25s iperf3 -s -1 -p 5204
+2026-05-05T14:56:45 | host1: timeout 18s iperf3 -c 10.1.0.14 -p 5204 -t 5 -J
+2026-05-05T14:56:50 | Running iperf3 UDP jitter for host1 -> host4
+2026-05-05T14:56:50 | host4: timeout 25s iperf3 -s -1 -p 5304
+2026-05-05T14:56:50 | host1: timeout 18s iperf3 -u -b 10M -c 10.1.0.14 -p 5304 -t 5 -J
+2026-05-05T14:56:55 | Testing Branch2 -> Branch2: admin1 -> guest1
+2026-05-05T14:56:55 | admin1: timeout 25s ping -c 8 -W 2 10.2.0.31
+2026-05-05T14:57:02 | admin1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.31
+2026-05-05T14:57:02 | Running iperf3 TCP for admin1 -> guest1
+2026-05-05T14:57:02 | guest1: timeout 25s iperf3 -s -1 -p 5205
+2026-05-05T14:57:02 | admin1: timeout 18s iperf3 -c 10.2.0.31 -p 5205 -t 5 -J
+2026-05-05T14:57:08 | Running iperf3 UDP jitter for admin1 -> guest1
+2026-05-05T14:57:08 | guest1: timeout 25s iperf3 -s -1 -p 5305
+2026-05-05T14:57:08 | admin1: timeout 18s iperf3 -u -b 10M -c 10.2.0.31 -p 5305 -t 5 -J
+2026-05-05T14:57:13 | Testing Branch3 -> Branch3: svr1 -> os1
+2026-05-05T14:57:13 | svr1: timeout 25s ping -c 8 -W 2 10.3.0.21
+2026-05-05T14:57:20 | svr1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.21
+2026-05-05T14:57:20 | Running iperf3 TCP for svr1 -> os1
+2026-05-05T14:57:20 | os1: timeout 25s iperf3 -s -1 -p 5206
+2026-05-05T14:57:20 | svr1: timeout 18s iperf3 -c 10.3.0.21 -p 5206 -t 5 -J
+2026-05-05T14:57:25 | Running iperf3 UDP jitter for svr1 -> os1
+2026-05-05T14:57:25 | os1: timeout 25s iperf3 -s -1 -p 5306
+2026-05-05T14:57:25 | svr1: timeout 18s iperf3 -u -b 10M -c 10.3.0.21 -p 5306 -t 5 -J
+2026-05-05T14:57:30 | Stopping Mininet topology
+Test run finished: 2026-05-05T14:57:32
+2026-05-05T14:57:32+07:00 | python3 code/plot_results.py
+2026-05-05T14:57:33+07:00 | python3 code/generate_report.py
+run_all finished: 2026-05-05T14:57:34+07:00
