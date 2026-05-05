@@ -1,0 +1,85 @@
+
+BỘ GIÁO DỤC VÀ ĐÀO TẠO
+TRƯỜNG ĐẠI HỌC TÔN ĐỨC THẮNG
+———————
+
+ĐỀ TÀI NGHIÊN CỨU MẠNG MÁY TÍNH
+
+MẠNG CẢM BIẾN VÀ THIẾT KẾ XÂY DỰNG MẠNG
+
+Ngành: Mạng máy tính và truyền thông dữ liệu
+
+
+Đề tài: Thiết kế và triển khai mạng Metro Ethernet
+sử dụng MPLS cho kết nối đa chi nhánh doanh nghiệp
+
+I. Mục tiêu
+
+- Xây dựng và mô phỏng mô hình mạng Metro Ethernet MAN sử dụng MPLS nhằm kết nối nhiều chi nhánh 
+doanh nghiệp thông qua hạ tầng mạng của nhà cung cấp dịch vụ (ISP).
+- Nghiên cứu tập trung vào việc đánh giá hiệu năng mạng và khả năng định tuyến của MPLS khi các 
+chi nhánh sử dụng các kiến trúc mạng nội bộ khác nhau.
+- Mô hình mạng được triển khai và kiểm thử trên nền tảng Mininet nhằm:
+• Phân tích khả năng kết nối giữa các chi nhánh doanh nghiệp thông
+qua Metro Ethernet MPLS backbone
+• Đánh giá hiệu năng truyền dữ liệu giữa các chi nhánh
+• So sánh ảnh hưởng của các kiến trúc mạng LAN nội bộ khác nhau
+đến hiệu suất mạng toàn hệ thống
+
+II. Yêu cầu triển khai mô hình
+
+Mô hình mô phỏng phải đáp ứng các yêu cầu sau:
+
+1. Kiến trúc mạng nội bộ tại các chi nhánh
+Các chi nhánh doanh nghiệp phải triển khai mạng nội bộ theo các mô hình khác nhau:
+• Chi nhánh 1: Mạng phẳng (Flat Network)
+• Chi nhánh 2: Mạng 3 lớp (Core – Distribution – Access)
+• Chi nhánh 3: Mạng 2 lớp (Leaf-Spine)
+Các mạng nội bộ này được kết nối đến mạng của nhà cung cấp dịch vụ thông qua router CE.
+
+2. Hạ tầng Metro Ethernet
+Nhà cung cấp dịch vụ triển khai:
+• Nhà cung cấp dịch vụ triển khai:
+– MPLS Backbone
+– Các router:
+∗ PE (Provider Edge)
+∗ P (Provider)
+MPLS được sử dụng để:
+• Tăng tốc quá trình chuyển mạch
+• Phân tách lưu lượng
+• Hỗ trợ định tuyến hiệu quả giữa các chi nhánh.
+
+3. Mô phỏng hệ thống
+Toàn bộ hệ thống được triển khai trên: Mininet Network Emulator
+Bao gồm: Router P, Router PE, Router CE, Switch, và Host.
+
+4. Kiểm tra lưu lượng và độ trễ
+
+III. Nội dung nghiên cứu
+
+1. Kiến trúc Metro Ethernet MAN
+2. Nguyên lý hoạt động của MPLS Label Switching
+3. Thiết lập và cấu hình P – PE – CE routers
+4. Kết nối các chi nhánh doanh nghiệp qua Metro Ethernet MPLS
+5. Mô phỏng và kiểm thử hệ thống trên Mininet
+6. Đo lường và phân tích hiệu năng mạng
+
+IV. Kết quả cần đạt được
+
+1. Bảng thống kê hiệu năng mạng
+Bao gồm các chỉ số: Throughput, Delay, Packet loss, Jitter
+
+2. Đồ thị so sánh hiệu năng
+• Throughput giữa các chi nhánh
+• Độ trễ khi truyền dữ liệu
+• Packet loss khi tải mạng tăng
+
+3. Phân tích ảnh hưởng của kiến trúc mạng LAN
+So sánh: Mạng phẳng, Mạng 2 lớp, Mạng 3 lớp về hiệu năng truyền dữ liệu, độ ổn định mạng
+
+4. Đánh giá hoạt động của MPLS
+Phân tích: quá trình label switching, đường đi của gói tin, hiệu quả
+của MPLS so với IP routing truyền thống.
+
+5. Báo cáo hoàn chỉnh quá trình làm bài từ mục II đến IV, lưu vào file word, có đầy đủ hình ảnh cần thiết
+Ngành: Mạng máy tính và truyền thông dữ liệu

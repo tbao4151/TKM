@@ -1,0 +1,4 @@
+networkx>=3.0
+matplotlib>=3.6
+pandas>=2.0
+python-docx>=1.1

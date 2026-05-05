@@ -1,0 +1,27 @@
+Environment check time: 2026-05-03T19:27:30+07:00
+OS information:
+Distributor ID:	Ubuntu
+Description:	Ubuntu 24.04.1 LTS
+Release:	24.04
+Codename:	noble
+
+
+Command availability:
+OK: mn -> /usr/local/bin/mn
+/usr/local/bin/mn:4: DeprecationWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html
+OK: ovs-vsctl -> /usr/bin/ovs-vsctl
+ovs-vsctl (Open vSwitch) 3.3.4
+OK: iperf -> /usr/bin/iperf
+iperf version 2.1.9 (14 March 2023) pthreads
+OK: iperf3 -> /usr/bin/iperf3
+iperf 3.16 (cJSON 1.7.15)
+OK: traceroute -> /usr/sbin/traceroute
+Modern traceroute for Linux, version 2.1.5
+OK: python3 -> /usr/bin/python3
+Python 3.12.3
+
+Python package check:
+OK: networkx
+OK: matplotlib
+OK: pandas
+OK: docx

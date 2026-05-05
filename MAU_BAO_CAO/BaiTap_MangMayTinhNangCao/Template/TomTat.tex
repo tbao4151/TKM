@@ -1,0 +1,23 @@
+\section*{TÓM TẮT}
+
+\begin{itemize}
+    \item[-] \textbf{Vấn đề nghiên cứu:}
+    Báo cáo tập trung vào việc nghiên cứu và triển khai kỹ thuật danh sách điều khiển truy cập (Access Control List - ACL) trong mô hình mạng phân cấp 3 lớp (Core - Distribution - Access) có tích hợp vùng DMZ. Nội dung chính bao gồm:
+        \begin{itemize}
+        \item[•] Chương 1: Thiết kế và Triển khai ACL trong mô hình mạng 3 lớp có DMZ.
+        \end{itemize}
+        
+    \item[-] \textbf{Các hướng tiếp cận:}
+        \begin{itemize}
+        \item[•] \textbf{Lý thuyết:} Tìm hiểu về nguyên lý hoạt động của Standard ACL và Extended ACL, các quy tắc lọc gói tin dựa trên địa chỉ IP, cổng (port) và giao thức (protocol).
+        \item[•] \textbf{Thực hành:} Sử dụng Mininet để mô phỏng hệ thống mạng và công cụ iptables để cấu hình các chính sách bảo mật thực tế.
+        \end{itemize}
+        
+    \item[-] \textbf{Cách giải quyết vấn đề:}
+    Dựa trên yêu cầu bảo mật của hệ thống mạng trường đại học giả định (TDTU), nhóm thực hiện phân tích các luồng dữ liệu (traffic flow), từ đó thiết kế các luật (rules) chặn/cho phép tương ứng. Sử dụng ngôn ngữ Python để tự động hóa việc dựng topology và áp dụng cấu hình.
+
+    \item[-] \textbf{Kết quả đạt được:}
+    Xây dựng thành công mô hình mạng với đầy đủ các phân vùng: Nội bộ (Inside), Công cộng (DMZ) và Internet (Outside). Đảm bảo các chính sách bảo mật: ngăn chặn truy cập trái phép từ Internet vào nội bộ, cô lập mạng sinh viên và giảng viên, và bảo vệ quyền quản trị thiết bị.
+\end{itemize}
+
+\newpage

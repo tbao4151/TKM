@@ -1,0 +1,5 @@
+Code python vẽ sơ đồ mạng và bố cục các thiết bị như ảnh mẫu
+code python cấu hình mạng như ofps, ...
+
+code python 1 cái tool giao diện đẹp, có thể điều khiển để chủ động xem thực tế tình trạng mạng giữa các thiết bị, 
+từ ping, có thể chủ động kết nối giữa các thiết bị có dến được với nhau không, rồi các chỉ số Throughput, Delay, Packet loss, Jitter

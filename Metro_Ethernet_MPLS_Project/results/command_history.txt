@@ -1,0 +1,2 @@
+Test run started: 2026-05-03T20:00:01
+2026-05-03T20:00:01 | Starting Mininet topology for real performance tests

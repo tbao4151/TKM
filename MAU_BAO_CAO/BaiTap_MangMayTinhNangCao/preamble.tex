@@ -1,0 +1,130 @@
+%% 1. CÀI ĐẶT GÓI & NGÔN NGỮ
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{lmodern}      % Sửa lỗi font size not available
+
+% Các gói bảng và màu sắc
+\usepackage{booktabs} 
+\usepackage{tikz}         % Gói này sẽ tự tải xcolor (đã được PassOptions ở main.tex)
+\usepackage{tcolorbox}
+\usepackage[T1]{fontenc}
+
+%% 2. BỐ CỤC TRANG
+\usepackage[paperheight=29.7cm,paperwidth=21cm,right=2cm,left=3.5cm,top=3.5cm,bottom=3.5cm]{geometry}
+%% 3. FONT CHỮ & ĐỊNH DẠNG
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx}     % Font Times New Roman
+\usepackage{indentfirst}
+\renewcommand{\baselinestretch}{1.2} 
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{1cm}
+
+%% 4. TÙY CHỈNH TIÊU ĐỀ (SECTION)
+\usepackage{titlesec}
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{2} % Chỉ hiện mục lục đến cấp 2
+
+% --- SỬA ĐỔI: CĂN TRÁI VÀ CÙNG 1 DÒNG ---
+
+% 1. Định dạng cho các chương CÓ ĐÁNH SỐ (Ví dụ: CHƯƠNG I. GIỚI THIỆU)
+\titleformat{\section}[block] % Đổi [display] thành [block] để nằm cùng dòng
+  {\fontsize{16pt}{0pt}\selectfont \bfseries} % Bỏ \centering để căn trái
+  {CHƯƠNG \Roman{section}.}
+  {1em} % Khoảng cách giữa chữ "CHƯƠNG I." và Tên chương
+  {}
+\titlespacing*{\section}{0pt}{0pt}{15pt}
+
+% 2. Định dạng cho các chương KHÔNG ĐÁNH SỐ (Ví dụ: MỤC LỤC, LỜI CẢM ƠN)
+\titleformat{name=\section,numberless}[block] % Đổi [display] thành [block]
+  {\fontsize{16pt}{0pt}\selectfont \bfseries} % Bỏ \centering
+  {}
+  {0em}
+  {}
+
+% Định dạng mục con (Subsection) - Giữ nguyên
+\titleformat*{\subsection}{\fontsize{14pt}{0pt}\selectfont \bfseries}
+\titlespacing*{\subsection}{0pt}{6pt}{0pt}
+
+\titleformat*{\subsubsection}{\fontsize{13pt}{0pt}\selectfont \bfseries \itshape}
+\titlespacing*{\subsubsection}{0pt}{6pt}{0pt}
+
+%% 5. HÌNH ẢNH & BẢNG
+\usepackage[nottoc]{tocbibind}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage[font=normal]{caption}
+\usepackage{array}
+
+% Đổi tên nhãn
+\renewcommand{\figurename}{\fontsize{12pt}{0pt}\selectfont Hình}
+\renewcommand{\thefigure}{\thesection.\arabic{figure}}
+\captionsetup[figure]{labelsep=space}
+
+\renewcommand{\tablename}{\fontsize{12pt}{0pt}\selectfont Bảng}
+\renewcommand{\thetable}{\thesection.\arabic{table}}
+\captionsetup[table]{labelsep=space}
+
+% Định nghĩa cột cho bảng
+\newcolumntype{s}{>{\hsize=.3\hsize}X}
+\newcolumntype{y}{>{\hsize=.4\hsize}X}
+\newcolumntype{d}{>{\hsize=.1\hsize}X}
+\renewcommand{\tabularxcolumn}[1]{>{\small}m{#1}}
+
+%% 6. CODE LISTINGS
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinestyle{customcode}{
+    backgroundcolor=\color{white},
+    basicstyle=\footnotesize\ttfamily,
+    breaklines=true,                 % Kích hoạt tự động xuống dòng
+    breakatwhitespace=false,         % Cho phép ngắt dòng ở cả những chỗ không có dấu cách
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}, % Thêm dấu mũi tên khi xuống dòng
+    frame=single,
+    rulecolor=\color{black!50},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{purple},
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    inputencoding=utf8,
+    extendedchars=true
+}
+\renewcommand{\lstlistingname}{Khối lệnh}
+\lstset{style=customcode} % <--- QUAN TRỌNG: Lệnh này áp dụng style cho toàn bộ văn bản
+
+%% 7. CẤU HÌNH KHÁC
+\usepackage{natbib}
+\bibliographystyle{apalike}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{chngcntr}
+
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\counterwithin{equation}{section}
+
+%% 8. ĐỊNH NGHĨA BIẾN & TÊN
+\AtBeginDocument{%
+  \renewcommand{\contentsname}{MỤC LỤC}
+  \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+  \renewcommand{\listtablename}{DANH MỤC BẢNG BIỂU}
+  \renewcommand{\refname}{TÀI LIỆU THAM KHẢO}
+}
+
+% Thông tin đề tài
+\newcommand{\khoa}{CÔNG NGHỆ THÔNG TIN}
+\newcommand{\mon}{BÁO CÁO MÔN HỌC}
+\newcommand{\chuyennganh}{THIẾT KẾ MẠNG}
+\newcommand{\de}{Triển khai Mô hình Mạng 3 lớp} 
+\newcommand{\gvhd}{ThS. LÊ VIẾT THANH}
+\newcommand{\svmot}{HUỲNH NGUYỄN QUỐC VIỆT - 52300267}
+\newcommand{\svhai}{PHẠM HOÀI THƯƠNG - 52300267}
+
+\newcommand{\nam}{2026}
