@@ -1,0 +1,38 @@
+\begin{thebibliography}{1}
+
+\bibitem{mef}
+MEF, ``Metro ethernet forum (mef).'' \url{https://www.mef.net}, 2026.
+
+\bibitem{rfc3031}
+E.~Rosen, A.~Viswanathan, and R.~Callon, ``Rfc 3031: Multiprotocol label
+  switching architecture.'' \url{https://www.rfc-editor.org/rfc/rfc3031}, 2001.
+
+\bibitem{rfc5036}
+L.~Andersson, I.~Minei, and B.~Thomas, ``Rfc 5036: Ldp specification.''
+  \url{https://www.rfc-editor.org/rfc/rfc5036}, 2007.
+
+\bibitem{ciscompls}
+C.~Systems, ``Multiprotocol label switching (mpls) documentation.''
+  \url{https://www.cisco.com/c/en/us/tech/mpls}, 2026.
+
+\bibitem{mininet}
+Mininet, ``Mininet: Rapid prototyping for software defined networks.''
+  \url{http://mininet.org}, 2026.
+
+\bibitem{frr}
+FRRouting, ``Frrouting: Internet routing protocol suite for linux.''
+  \url{https://frrouting.org}, 2026.
+
+\bibitem{ovs}
+O.~vSwitch, ``Open vswitch documentation.'' \url{https://www.openvswitch.org},
+  2026.
+
+\bibitem{iperf3}
+ESnet, ``iperf3 user documentation.'' \url{https://software.es.net/iperf/},
+  2026.
+
+\bibitem{linuxmpls}
+L.~K. Documentation, ``Linux mpls kernel documentation.''
+  \url{https://docs.kernel.org/networking/mpls-sysctl.html}, 2026.
+
+\end{thebibliography}
