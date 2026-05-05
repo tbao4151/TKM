@@ -24,7 +24,7 @@
 \begin{document}
 
 {
-\setbeamertemplate{headline}{} % Hide header on title page to put logo explicitly if needed, but it's easier to just put it:
+\setbeamertemplate{headline}{} % Hide header on title page to put logo explicitly if needed
 \begin{frame}
 \begin{tikzpicture}[remember picture,overlay]
 \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.5cm]{image/logo-tdtu.jpg}};
@@ -37,108 +37,189 @@
     \tableofcontents
 \end{frame}
 
-\section{Mở đầu \& Giới thiệu}
-\begin{frame}{Mở đầu \& Giới thiệu}
+\section{1. Mở đầu \& Giới thiệu}
+\begin{frame}{1. Mở đầu \& Giới thiệu}
     \begin{itemize}
-        \item \textbf{Mục tiêu:} Xây dựng mô hình kết nối 3 chi nhánh doanh nghiệp qua hạ tầng mạng nhà cung cấp (Metro Ethernet).
-        \item \textbf{Kiến trúc LAN đa dạng:}
-        \begin{itemize}
-            \item Branch 1: Flat Network (Mạng phẳng).
-            \item Branch 2: Three-tier Network (Mạng 3 lớp: Access - Distribution - Core).
-            \item Branch 3: Leaf-Spine Network (Mạng trung tâm dữ liệu).
-        \end{itemize}
-        \item \textbf{Công nghệ lõi:} Sử dụng mạng chuyển mạch nhãn đa giao thức (MPLS).
+        \item \textbf{Bối cảnh:} Nhu cầu kết nối mạng nội bộ giữa các chi nhánh cách xa nhau của doanh nghiệp ngày càng tăng cao, đòi hỏi đường truyền ổn định, bảo mật và hiệu suất cao.
+        \item \textbf{Giải pháp:} Sử dụng công nghệ lõi \textbf{MPLS} (Multiprotocol Label Switching) trên nền tảng Metro Ethernet.
+        \item \textbf{Mục tiêu:} Xây dựng mô hình kết nối 3 chi nhánh doanh nghiệp qua hạ tầng mạng nhà cung cấp.
         \item \textbf{Môi trường mô phỏng:} Mininet, Open vSwitch, và Linux network namespaces.
     \end{itemize}
 \end{frame}
 
-\section{Mô hình tổng thể (Topology)}
-\begin{frame}{Mô hình tổng thể (Topology)}
+\section{2. Thiết kế Kiến trúc mạng LAN}
+\begin{frame}{2. Thiết kế Kiến trúc mạng LAN}
+    Mô hình bao gồm ba chi nhánh với các kiến trúc thiết kế khác nhau:
+    \vspace{0.3cm}
     \begin{columns}
-        \column{0.5\textwidth}
+        \column{0.33\textwidth}
+        \textbf{Branch 1: Flat Network}
         \begin{itemize}
-            \item \textbf{Backbone Provider:} Gồm các bộ định tuyến CE (Customer Edge), PE (Provider Edge), và P (Provider).
-            \item \textbf{Đường đi dữ liệu:} Lưu lượng liên chi nhánh bắt buộc phải đi qua lộ trình: CE $\rightarrow$ PE $\rightarrow$ P $\rightarrow$ PE $\rightarrow$ CE.
-            \item Đảm bảo đúng chuẩn thiết kế kiến trúc mạng diện rộng (WAN/MAN).
+            \item Mạng phẳng đơn giản.
+            \item Dành cho quy mô nhỏ.
+            \item Tất cả thiết bị chung 1 broadcast domain.
         \end{itemize}
-        \column{0.5\textwidth}
+        
+        \column{0.33\textwidth}
+        \textbf{Branch 2: Three-tier}
+        \begin{itemize}
+            \item Access - Distribution - Core.
+            \item Dành cho quy mô trung bình đến lớn.
+            \item Dễ dàng mở rộng, quản trị.
+        \end{itemize}
+        
+        \column{0.33\textwidth}
+        \textbf{Branch 3: Leaf-Spine}
+        \begin{itemize}
+            \item Kiến trúc trung tâm dữ liệu.
+            \item Tối ưu lưu lượng East-West.
+            \item Độ trễ thấp và dự phòng cao.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\section{3. Thiết kế Mô hình tổng thể (Topology)}
+\begin{frame}{3. Thiết kế Mô hình tổng thể (Topology)}
+    \begin{columns}
+        \column{0.45\textwidth}
+        \begin{itemize}
+            \item \textbf{Mạng nhà cung cấp (Provider Backbone):} 
+            \begin{itemize}
+                \item \textbf{CE (Customer Edge):} Bộ định tuyến phía khách hàng.
+                \item \textbf{PE (Provider Edge):} Bộ định tuyến biên nhà cung cấp.
+                \item \textbf{P (Provider Router):} Bộ định tuyến lõi trung tâm.
+            \end{itemize}
+            \item Lưu lượng liên chi nhánh bắt buộc đi qua lộ trình: CE $\rightarrow$ PE $\rightarrow$ P $\rightarrow$ PE $\rightarrow$ CE.
+        \end{itemize}
+        \column{0.55\textwidth}
         \centering
         \includegraphics[width=\textwidth]{image/topology_overview.png}
     \end{columns}
 \end{frame}
 
-\section{Hoạt động của MPLS \& OSPF/LDP}
-\begin{frame}{Cơ chế hoạt động của MPLS \& Control-Plane}
+\section{4. Cơ chế hoạt động của MPLS}
+\begin{frame}{4. Cơ chế hoạt động của MPLS}
     \begin{block}{Quá trình chuyển tiếp bằng nhãn (MPLS Forwarding)}
+        Thay vì định tuyến IP qua từng chặng, MPLS chuyển tiếp gói tin nhanh chóng nhờ nhãn:
         \begin{itemize}
-            \item \textbf{Ingress PE:} Gán nhãn (Push label) vào gói tin.
-            \item \textbf{P Router:} Hoán đổi nhãn (Swap label) và chuyển tiếp, không cần tra bảng định tuyến IP tĩnh đến khách hàng.
-            \item \textbf{Egress PE:} Gỡ nhãn (Pop label) và đẩy gói tin về mạng đích.
-        \end{itemize}
-    \end{block}
-    
-    \begin{block}{Control-Plane \& L2VPN}
-        \begin{itemize}
-            \item Sử dụng \textbf{FRRouting} cho OSPF/LDP để phân bổ nhãn động.
-            \item Data-plane VPLS/L2VPN hiện thực bằng \textbf{Linux GRETAP pseudowire} (có tính năng split-horizon).
-            \item Minh chứng thực tế qua \texttt{tcpdump} với ethertype \texttt{0x8847} và Header MPLS.
+            \item \textbf{Ingress PE:} Gán nhãn (Push label) vào gói tin khi đi vào mạng lõi.
+            \item \textbf{P Router:} Hoán đổi nhãn (Swap label) và chuyển tiếp ở Layer 2.5, không cần tra bảng định tuyến IP (tránh overhead).
+            \item \textbf{Egress PE:} Gỡ nhãn (Pop label) và đẩy gói tin IP chuẩn về mạng đích CE.
         \end{itemize}
     \end{block}
 \end{frame}
 
-\section{Đo lường \& Phân tích hiệu năng}
-\begin{frame}{Đo lường \& Phân tích hiệu năng}
+\begin{frame}{4. Minh chứng hoạt động MPLS thực tế}
     \begin{itemize}
-        \item Đo lường dựa trên số liệu thực tế bằng các công cụ \textbf{ping, traceroute, iperf3}.
-        \item \textbf{Các chỉ số đo kiểm:}
-        \begin{itemize}
-            \item Thông lượng (Throughput).
-            \item Độ trễ (Delay / RTT).
-            \item Độ biến thiên trễ (Jitter).
-            \item Suy hao gói tin (Packet Loss).
-        \end{itemize}
-        \item \textbf{Kết quả:} 
-        \begin{itemize}
-            \item Giao tiếp nội bộ chi nhánh có tốc độ rất cao ($>94$ Mbps) và trễ thấp.
-            \item Giao tiếp liên chi nhánh bị giới hạn bởi năng lực mạng backbone (50-60 Mbps).
-            \item Tải UDP tăng cao (80-120 Mbps) gây ra suy hao rõ rệt.
-        \end{itemize}
+        \item Dự án triển khai \textbf{native Linux kernel MPLS}.
+        \item Minh chứng thực tế qua \texttt{tcpdump} bắt được gói tin có chứa Header MPLS và ethertype \texttt{0x8847}.
     \end{itemize}
+    \vspace{0.2cm}
+    \begin{center}
+        \includegraphics[width=0.85\textwidth]{image/mpls_backbone.png}
+    \end{center}
 \end{frame}
 
-\section{Demo \& Kiểm chứng kết quả}
-\begin{frame}{Kiểm chứng thực tế \& Giao diện Demo}
+\section{5. Control-Plane \& L2VPN}
+\begin{frame}{5. Giao thức điều khiển (Control-Plane) \& L2VPN}
     \begin{columns}
         \column{0.5\textwidth}
-        \textbf{Minh chứng cấu hình \& MPLS:}
+        \textbf{FRRouting (OSPF/LDP)}
         \begin{itemize}
-            \item Các file log: \texttt{environment\_check.txt}, \texttt{mpls\_routes.txt}.
-            \item Gói tin MPLS thực sự tồn tại (không mô phỏng chay).
-        \end{itemize}
-        \textbf{Bộ công cụ tự động hóa:}
-        \begin{itemize}
-            \item Script chạy tự động (run\_all.sh).
-            \item Ứng dụng GUI viết bằng Python hỗ trợ trình chiếu trực quan tốc độ, delay, packet loss...
+            \item Sử dụng OSPF định tuyến Underlay.
+            \item Sử dụng LDP (Label Distribution Protocol) để phân bổ nhãn động trên PE và P router.
         \end{itemize}
         
         \column{0.5\textwidth}
-        \centering
-        \includegraphics[width=0.9\textwidth]{image/case5_performance_table_gui.png}\\
-        \vspace{0.2cm}
-        \includegraphics[width=0.9\textwidth]{image/packet_loss_chart.png}
+        \textbf{VPLS/L2VPN Data-plane}
+        \begin{itemize}
+            \item Các chi nhánh kết nối ở Layer 2 thông qua dịch vụ VPLS.
+            \item Hiện thực bằng \textbf{Linux GRETAP pseudowire} với tính năng split-horizon để ngăn vòng lặp.
+        \end{itemize}
     \end{columns}
 \end{frame}
 
-\section{Tổng kết}
-\begin{frame}{Tổng kết}
+\section{6. Đo lường \& Phân tích hiệu năng}
+\begin{frame}{6. Kịch bản Đo lường \& Phân tích hiệu năng}
+    Sử dụng các công cụ \textbf{ping, traceroute, iperf3} để đánh giá 4 chỉ số chính:
+    \vspace{0.3cm}
     \begin{itemize}
-        \item \textbf{Đạt được:} Triển khai thành công và chứng minh được cơ chế MPLS thực tế trên môi trường mạng diện rộng ảo hóa với Mininet. Tích hợp tốt các thiết kế chuẩn LAN (Flat, 3-Tier, Leaf-Spine).
-        \item \textbf{Dữ liệu trung thực:} 100\% các thông số là kết quả benchmark thật, hỗ trợ báo cáo chuẩn học thuật IEEE.
-        \item \textbf{Sáng tạo:} Cung cấp GUI hỗ trợ giám sát, đo lường theo kịch bản và sinh biểu đồ tự động.
+        \item \textbf{Thông lượng (Throughput):} Khả năng truyền tải tối đa.
+        \item \textbf{Độ trễ (Delay / RTT):} Thời gian gói tin đi và về.
+        \item \textbf{Độ biến thiên trễ (Jitter):} Sự dao động của độ trễ trong truyền tải UDP.
+        \item \textbf{Suy hao gói tin (Packet Loss):} Tỉ lệ gói tin bị mất, đặc biệt đo trong kịch bản tăng tải liên tục (UDP Load Sweep).
     \end{itemize}
-    \vspace{0.5cm}
+\end{frame}
+
+\begin{frame}{6. Kết quả Thông lượng \& Độ trễ}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Thông lượng (Throughput)}\\
+        \vspace{0.2cm}
+        \includegraphics[width=0.9\textwidth]{image/throughput_chart.png}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Độ trễ (Delay)}\\
+        \vspace{0.2cm}
+        \includegraphics[width=0.9\textwidth]{image/delay_chart.png}
+    \end{columns}
+    \vspace{0.4cm}
+    \small Giao tiếp nội bộ chi nhánh có tốc độ rất cao ($>94$ Mbps) và trễ thấp. Giao tiếp liên chi nhánh bị giới hạn bởi năng lực mạng backbone (50-60 Mbps) và có trễ cao hơn do đi qua nhiều hop.
+\end{frame}
+
+\begin{frame}{6. Đánh giá tắc nghẽn (UDP Load Sweep)}
+    \begin{columns}
+        \column{0.45\textwidth}
+        \begin{itemize}
+            \item Tăng dần tải UDP từ 5 Mbps lên 120 Mbps.
+            \item Khi tải vượt ngưỡng chịu đựng của backbone (60 Mbps), suy hao gói tin (Packet Loss) bắt đầu xảy ra rõ rệt ở mức 80M và 120M.
+            \item Phản ánh tính trung thực của môi trường mô phỏng.
+        \end{itemize}
+        \column{0.55\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image/packet_loss_chart.png}
+    \end{columns}
+\end{frame}
+
+\section{7. Giao diện Giám sát \& Tự động hóa}
+\begin{frame}{7. Giao diện Giám sát \& Tự động hóa}
+    \begin{columns}
+        \column{0.4\textwidth}
+        \textbf{Bộ công cụ tự động:}
+        \begin{itemize}
+            \item Script chạy toàn trình \texttt{run\_all.sh} xây dựng topology, sinh log.
+            \item Ứng dụng \textbf{GUI bằng Python} hỗ trợ demo trực quan.
+            \item Theo dõi trực tiếp tốc độ, ping, traceroute và vẽ biểu đồ.
+        \end{itemize}
+        
+        \column{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image/case5_performance_table_gui.png}
+    \end{columns}
+\end{frame}
+
+\section{8. Kết luận}
+\begin{frame}{8. Kết luận}
+    \begin{itemize}
+        \item \textbf{Đạt được:} Triển khai thành công hệ thống Metro Ethernet quy mô đa chi nhánh với nền tảng MPLS thực tế trên Linux kernel.
+        \item \textbf{Chất lượng mạng:} Đánh giá toàn diện sự khác biệt giữa mạng nội bộ và mạng diện rộng, cũng như phản ứng của MPLS dưới áp lực tải cao.
+        \item \textbf{Tính minh bạch:} 100\% các thông số là kết quả benchmark thật, minh chứng đầy đủ qua log tcpdump và bảng định tuyến.
+        \item \textbf{Thực tiễn:} Công cụ tự động hóa và GUI giúp việc quản trị và giám sát trở nên trực quan, hiện đại.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain] % Slide trơn không tiêu đề, không đánh số
+    \begin{tikzpicture}[remember picture,overlay]
+    \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.5cm]{image/logo-tdtu.jpg}};
+    \end{tikzpicture}
+    \vspace{2cm}
     \centering
-    \Large \textbf{XIN CHÂN THÀNH CẢM ƠN THẦY VÀ CÁC BẠN ĐÃ LẮNG NGHE!}
+    \Huge \textbf{XIN CHÂN THÀNH CẢM ƠN!}\\
+    \vspace{1cm}
+    \Large \textbf{Thầy và các bạn đã chú ý lắng nghe.}\\
+    \vspace{1.5cm}
+    \normalsize \textit{Mời Thầy và các bạn đặt câu hỏi!}
 \end{frame}
 
 \end{document}
