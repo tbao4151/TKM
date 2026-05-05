@@ -9,12 +9,8 @@
 \usetheme{Madrid}
 \usecolortheme{default}
 
-% Draw the logo on top of the frametitle blue box
-\addtobeamertemplate{frametitle}{}{%
-\begin{tikzpicture}[remember picture,overlay]
-\node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.2cm]{image/logo-tdtu.jpg}};
-\end{tikzpicture}
-}
+% Command to insert logo inline in the frametitle
+\newcommand{\tdtulogo}{\raisebox{-0.15cm}{\includegraphics[height=0.75cm]{image/logo-tdtu.jpg}}\hspace{0.2cm}}
 
 \title[Metro Ethernet MPLS]{Thiết kế và triển khai mạng Metro Ethernet sử dụng MPLS cho kết nối đa chi nhánh doanh nghiệp}
 \author[N.V.T.Bảo]{Nguyễn Văn Thiên Bảo - 52300179}
@@ -33,12 +29,12 @@
 \end{frame}
 }
 
-\begin{frame}{\hspace*{1.5cm}Nội dung trình bày}
+\begin{frame}{\tdtulogo Nội dung trình bày}
     \tableofcontents
 \end{frame}
 
 \section{1. Mở đầu \& Giới thiệu}
-\begin{frame}{\hspace*{1.5cm}1. Mở đầu \& Giới thiệu}
+\begin{frame}{\tdtulogo 1. Mở đầu \& Giới thiệu}
     \begin{itemize}
         \item \textbf{Bối cảnh:} Nhu cầu kết nối mạng nội bộ giữa các chi nhánh cách xa nhau của doanh nghiệp ngày càng tăng cao, đòi hỏi đường truyền ổn định, bảo mật và hiệu suất cao.
         \item \textbf{Giải pháp:} Sử dụng công nghệ lõi \textbf{MPLS} (Multiprotocol Label Switching) trên nền tảng Metro Ethernet.
@@ -48,7 +44,7 @@
 \end{frame}
 
 \section{2. Thiết kế Kiến trúc mạng LAN}
-\begin{frame}{\hspace*{1.5cm}2. Thiết kế Kiến trúc mạng LAN}
+\begin{frame}{\tdtulogo 2. Thiết kế Kiến trúc mạng LAN}
     Mô hình bao gồm ba chi nhánh với các kiến trúc thiết kế khác nhau:
     \vspace{0.3cm}
     \begin{columns}
@@ -79,7 +75,7 @@
 \end{frame}
 
 \section{3. Thiết kế Mô hình tổng thể (Topology)}
-\begin{frame}{\hspace*{1.5cm}3. Thiết kế Mô hình tổng thể (Topology)}
+\begin{frame}{\tdtulogo 3. Thiết kế Mô hình tổng thể (Topology)}
     \begin{columns}
         \column{0.45\textwidth}
         \begin{itemize}
@@ -98,7 +94,7 @@
 \end{frame}
 
 \section{4. Cơ chế hoạt động của MPLS}
-\begin{frame}{\hspace*{1.5cm}4. Cơ chế hoạt động của MPLS}
+\begin{frame}{\tdtulogo 4. Cơ chế hoạt động của MPLS}
     \begin{block}{Quá trình chuyển tiếp bằng nhãn (MPLS Forwarding)}
         Thay vì định tuyến IP qua từng chặng, MPLS chuyển tiếp gói tin nhanh chóng nhờ nhãn:
         \begin{itemize}
@@ -109,7 +105,7 @@
     \end{block}
 \end{frame}
 
-\begin{frame}{\hspace*{1.5cm}4. Minh chứng hoạt động MPLS thực tế}
+\begin{frame}{\tdtulogo 4. Minh chứng hoạt động MPLS thực tế}
     \begin{itemize}
         \item Dự án triển khai \textbf{native Linux kernel MPLS}.
         \item Minh chứng thực tế qua \texttt{tcpdump} bắt được gói tin có chứa Header MPLS và ethertype \texttt{0x8847}.
@@ -121,7 +117,7 @@
 \end{frame}
 
 \section{5. Control-Plane \& L2VPN}
-\begin{frame}{\hspace*{1.5cm}5. Giao thức điều khiển (Control-Plane) \& L2VPN}
+\begin{frame}{\tdtulogo 5. Giao thức điều khiển (Control-Plane) \& L2VPN}
     \begin{columns}
         \column{0.5\textwidth}
         \textbf{FRRouting (OSPF/LDP)}
@@ -140,7 +136,7 @@
 \end{frame}
 
 \section{6. Đo lường \& Phân tích hiệu năng}
-\begin{frame}{\hspace*{1.5cm}6. Kịch bản Đo lường \& Phân tích hiệu năng}
+\begin{frame}{\tdtulogo 6. Kịch bản Đo lường \& Phân tích hiệu năng}
     Sử dụng các công cụ \textbf{ping, traceroute, iperf3} để đánh giá 4 chỉ số chính:
     \vspace{0.3cm}
     \begin{itemize}
@@ -151,7 +147,7 @@
     \end{itemize}
 \end{frame}
 
-\begin{frame}{\hspace*{1.5cm}6. Kết quả Thông lượng \& Độ trễ}
+\begin{frame}{\tdtulogo 6. Kết quả Thông lượng \& Độ trễ}
     \begin{columns}
         \column{0.5\textwidth}
         \centering
@@ -168,7 +164,7 @@
     \small Giao tiếp nội bộ chi nhánh có tốc độ rất cao ($>94$ Mbps) và trễ thấp. Giao tiếp liên chi nhánh bị giới hạn bởi năng lực mạng backbone (50-60 Mbps) và có trễ cao hơn do đi qua nhiều hop.
 \end{frame}
 
-\begin{frame}{\hspace*{1.5cm}6. Đánh giá tắc nghẽn (UDP Load Sweep)}
+\begin{frame}{\tdtulogo 6. Đánh giá tắc nghẽn (UDP Load Sweep)}
     \begin{columns}
         \column{0.45\textwidth}
         \begin{itemize}
@@ -183,7 +179,7 @@
 \end{frame}
 
 \section{7. Giao diện Giám sát \& Tự động hóa}
-\begin{frame}{\hspace*{1.5cm}7. Giao diện Giám sát \& Tự động hóa}
+\begin{frame}{\tdtulogo 7. Giao diện Giám sát \& Tự động hóa}
     \begin{columns}
         \column{0.4\textwidth}
         \textbf{Bộ công cụ tự động:}
@@ -200,7 +196,7 @@
 \end{frame}
 
 \section{8. Kết luận}
-\begin{frame}{\hspace*{1.5cm}8. Kết luận}
+\begin{frame}{\tdtulogo 8. Kết luận}
     \begin{itemize}
         \item \textbf{Đạt được:} Triển khai thành công hệ thống Metro Ethernet quy mô đa chi nhánh với nền tảng MPLS thực tế trên Linux kernel.
         \item \textbf{Chất lượng mạng:} Đánh giá toàn diện sự khác biệt giữa mạng nội bộ và mạng diện rộng, cũng như phản ứng của MPLS dưới áp lực tải cao.
