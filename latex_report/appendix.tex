@@ -37,7 +37,7 @@ python3 code/gui_monitor.py
 \end{lstlisting}
 
 \subsection*{E. Trích mã cấu hình VPLS/L2VPN}
-\begin{lstlisting}[language=Python, caption={Logic CE WAN và GRETAP pseudowire trong network_config.py}]
+\begin{lstlisting}[language=Python, caption={Logic CE WAN và GRETAP pseudowire trong network\_config.py}]
 for network, gateway in VPLS_CE_ROUTES[ce_name]:
     run(ce, f"ip route replace {network} via {gateway} dev {intf}")
 
