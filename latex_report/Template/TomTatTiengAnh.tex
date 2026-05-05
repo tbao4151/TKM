@@ -1,10 +1,10 @@
-\section*{\fontsize{16pt}{15pt}\selectfont DESIGN AND IMPLEMENTATION OF A METRO ETHERNET MPLS NETWORK\\FOR MULTI-BRANCH ENTERPRISE CONNECTIVITY\\ABSTRACT}
+\section*{ABSTRACT}
 \phantomsection \addcontentsline{toc}{section}{\numberline {} ABSTRACT}
 
-This report presents the design and implementation of a Metro Ethernet network using MPLS for connecting three enterprise branches. Each branch uses a different LAN architecture: Flat Network, Three-tier Network, and Leaf-Spine Network. The provider backbone contains CE, PE, and P routers and is emulated on Mininet with Open vSwitch and Linux network namespaces.
+This report presents the design and implementation of a Metro Ethernet network using Multiprotocol Label Switching (MPLS) for connecting three enterprise branches. Each branch features a distinct LAN architecture: Flat Network, Three-tier Network, and Leaf-Spine Network. The provider backbone, comprising Customer Edge (CE), Provider Edge (PE), and Provider (P) routers, is emulated on the Mininet platform utilizing Open vSwitch and Linux network namespaces.
 
-The main technical focus is native Linux kernel MPLS forwarding. Ingress PE routers push labels with \texttt{ip route encap mpls}; P routers swap labels using \texttt{ip -f mpls route}; egress PE routers pop labels before forwarding packets back to the customer edge. The implementation is verified through MPLS route tables and tcpdump captures showing MPLS ethertype \texttt{0x8847}.
+The primary technical objective is to demonstrate native Linux kernel MPLS forwarding. Ingress PE routers perform label pushing via the \texttt{ip route encap mpls} command; P routers execute label swapping based on the \texttt{ip -f mpls route} table; and egress PE routers handle label popping before forwarding the packets to the CE. The accuracy of this implementation is verified through MPLS routing tables and packet captures using tcpdump, which clearly display the MPLS ethertype \texttt{0x8847} along with the MPLS shim header.
 
-Performance evaluation is conducted with real measurements from ping, traceroute, iperf3 TCP, iperf3 UDP, and tcpdump. The report includes throughput, delay, jitter, baseline packet loss, and UDP packet loss under increasing offered load. All reported values are generated from actual Mininet test logs and are not sample or simulated numbers.
+Network performance is comprehensively evaluated using standard measurement tools such as ping, traceroute, and iperf3 to determine throughput, delay, jitter, and packet loss. In addition to baseline measurements, the study incorporates UDP load testing at intervals of 5 Mbps, 20 Mbps, 50 Mbps, 80 Mbps, and 120 Mbps to analyze packet loss degradation under increasing network traffic. All quantitative data and findings presented in this report are strictly derived from empirical measurements conducted within the emulated environment.
 
 \newpage
