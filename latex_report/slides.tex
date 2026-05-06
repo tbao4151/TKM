@@ -9,7 +9,6 @@
 \usetheme{Madrid}
 \usecolortheme{default}
 
-% Command to insert logo inline in the frametitle
 \newcommand{\tdtulogo}{\raisebox{-0.15cm}{\includegraphics[height=0.75cm]{image/logo-tdtu.jpg}}\hspace{0.2cm}}
 
 \title[Metro Ethernet MPLS]{Thiết kế và triển khai mạng Metro Ethernet sử dụng MPLS cho kết nối đa chi nhánh doanh nghiệp}
@@ -20,7 +19,7 @@
 \begin{document}
 
 {
-\setbeamertemplate{headline}{} % Hide header on title page
+\setbeamertemplate{headline}{}
 \begin{frame}
 \begin{tikzpicture}[remember picture,overlay]
 \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.2cm]{image/logo-tdtu.jpg}};
@@ -29,183 +28,277 @@
 \end{frame}
 }
 
-\begin{frame}{\tdtulogo Nội dung trình bày}
-    \tableofcontents
-\end{frame}
-
-\section{1. Mở đầu \& Giới thiệu}
-\begin{frame}{\tdtulogo 1. Mở đầu \& Giới thiệu}
-    \begin{itemize}
-        \item \textbf{Bối cảnh:} Nhu cầu kết nối mạng nội bộ giữa các chi nhánh cách xa nhau của doanh nghiệp ngày càng tăng cao, đòi hỏi đường truyền ổn định, bảo mật và hiệu suất cao.
-        \item \textbf{Giải pháp:} Sử dụng công nghệ lõi \textbf{MPLS} (Multiprotocol Label Switching) trên nền tảng Metro Ethernet.
-        \item \textbf{Mục tiêu:} Xây dựng mô hình kết nối 3 chi nhánh doanh nghiệp qua hạ tầng mạng nhà cung cấp.
-        \item \textbf{Môi trường mô phỏng:} Mininet, Open vSwitch, và Linux network namespaces.
-    \end{itemize}
-\end{frame}
-
-\section{2. Thiết kế Kiến trúc mạng LAN}
-\begin{frame}{\tdtulogo 2. Thiết kế Kiến trúc mạng LAN}
-    Mô hình bao gồm ba chi nhánh với các kiến trúc thiết kế khác nhau:
-    \vspace{0.3cm}
-    \begin{columns}
-        \column{0.33\textwidth}
-        \textbf{Branch 1: Flat Network}
-        \begin{itemize}
-            \item Mạng phẳng đơn giản.
-            \item Dành cho quy mô nhỏ.
-            \item Tất cả thiết bị chung 1 broadcast domain.
-        \end{itemize}
-        
-        \column{0.33\textwidth}
-        \textbf{Branch 2: Three-tier}
-        \begin{itemize}
-            \item Access - Distribution - Core.
-            \item Dành cho quy mô trung bình đến lớn.
-            \item Dễ dàng mở rộng, quản trị.
-        \end{itemize}
-        
-        \column{0.33\textwidth}
-        \textbf{Branch 3: Leaf-Spine}
-        \begin{itemize}
-            \item Kiến trúc trung tâm dữ liệu.
-            \item Tối ưu lưu lượng East-West.
-            \item Độ trễ thấp và dự phòng cao.
-        \end{itemize}
-    \end{columns}
-\end{frame}
-
-\section{3. Thiết kế Mô hình tổng thể (Topology)}
-\begin{frame}{\tdtulogo 3. Thiết kế Mô hình tổng thể (Topology)}
+\section*{Tổng quan}
+\begin{frame}{\tdtulogo Tổng quan sơ đồ mạng Metro Ethernet MPLS}
     \begin{columns}
         \column{0.45\textwidth}
+        \small
         \begin{itemize}
-            \item \textbf{Mạng nhà cung cấp (Provider Backbone):} 
-            \begin{itemize}
-                \item \textbf{CE (Customer Edge):} Bộ định tuyến phía khách hàng.
-                \item \textbf{PE (Provider Edge):} Bộ định tuyến biên nhà cung cấp.
-                \item \textbf{P (Provider Router):} Bộ định tuyến lõi trung tâm.
-            \end{itemize}
-            \item Lưu lượng liên chi nhánh bắt buộc đi qua lộ trình: CE $\rightarrow$ PE $\rightarrow$ P $\rightarrow$ PE $\rightarrow$ CE.
+            \item 3 chi nhánh doanh nghiệp, mỗi chi nhánh dùng một kiến trúc LAN khác nhau.
+            \item Branch 1: Flat Network; Branch 2: Three-tier; Branch 3: Leaf-Spine.
+            \item Mỗi LAN nối vào CE, sau đó đi qua PE/P backbone của nhà cung cấp.
+            \item Lưu lượng liên chi nhánh đi theo tuyến CE $\rightarrow$ PE $\rightarrow$ P $\rightarrow$ PE $\rightarrow$ CE.
         \end{itemize}
+        \vspace{0.15cm}
+        \scriptsize Demo chính: \texttt{sudo python3 code/topology\_mininet.py --mode mpls --test-mode}
         \column{0.55\textwidth}
         \centering
         \includegraphics[width=\textwidth]{image/topology_overview.png}
     \end{columns}
 \end{frame}
 
-\section{4. Cơ chế hoạt động của MPLS}
-\begin{frame}{\tdtulogo 4. Cơ chế hoạt động của MPLS}
-    \begin{block}{Quá trình chuyển tiếp bằng nhãn (MPLS Forwarding)}
-        Thay vì định tuyến IP qua từng chặng, MPLS chuyển tiếp gói tin nhanh chóng nhờ nhãn:
-        \begin{itemize}
-            \item \textbf{Ingress PE:} Gán nhãn (Push label) vào gói tin khi đi vào mạng lõi.
-            \item \textbf{P Router:} Hoán đổi nhãn (Swap label) và chuyển tiếp ở Layer 2.5, không cần tra bảng định tuyến IP (tránh overhead).
-            \item \textbf{Egress PE:} Gỡ nhãn (Pop label) và đẩy gói tin IP chuẩn về mạng đích CE.
-        \end{itemize}
+\begin{frame}{\tdtulogo Lộ trình trình bày theo rubric}
+    \small
+    \begin{itemize}
+        \item \textbf{1/ Hình thức - 1.5 điểm:} báo cáo, hình ảnh, mục lục, trích dẫn.
+        \item \textbf{2/ Nội dung lý thuyết - 1.5 điểm:} Metro Ethernet, MPLS, OSPF/LDP, VPLS/L2VPN.
+        \item \textbf{4/ Demo \& triển khai - 5.0 điểm:} topology, MPLS core, tcpdump label, benchmark, GUI, log.
+        \item \textbf{5/ Khả năng biện luận - 2.0 điểm:} trả lời bản chất MPLS/LDP và thao tác lệnh tại chỗ.
+    \end{itemize}
+    \vspace{0.2cm}
+    \begin{block}{Thông điệp chính}
+        Toàn bộ số liệu trong báo cáo được sinh từ Mininet, ping, traceroute, iperf3 và tcpdump thật; không dùng dữ liệu mẫu.
     \end{block}
 \end{frame}
 
-\begin{frame}{\tdtulogo 4. Minh chứng hoạt động MPLS thực tế}
-    \begin{itemize}
-        \item Dự án triển khai \textbf{native Linux kernel MPLS}.
-        \item Minh chứng thực tế qua \texttt{tcpdump} bắt được gói tin có chứa Header MPLS và ethertype \texttt{0x8847}.
-    \end{itemize}
-    \vspace{0.2cm}
-    \begin{center}
-        \includegraphics[width=0.85\textwidth]{image/mpls_backbone.png}
-    \end{center}
-\end{frame}
-
-\section{5. Control-Plane \& L2VPN}
-\begin{frame}{\tdtulogo 5. Giao thức điều khiển (Control-Plane) \& L2VPN}
+\section{1. Hình thức}
+\begin{frame}{\tdtulogo Rubric 1 - Hình thức báo cáo}
+    \small
     \begin{columns}
-        \column{0.5\textwidth}
-        \textbf{FRRouting (OSPF/LDP)}
+        \column{0.52\textwidth}
         \begin{itemize}
-            \item Sử dụng OSPF định tuyến Underlay.
-            \item Sử dụng LDP (Label Distribution Protocol) để phân bổ nhãn động trên PE và P router.
+            \item \textbf{1.1 Bố cục:} báo cáo Word và LaTeX theo cấu trúc 5 chương.
+            \item \textbf{1.2 Hình ảnh:} topology tổng thể, 3 LAN riêng, MPLS backbone.
+            \item \textbf{1.3 Mục lục:} LaTeX có mục lục, danh mục hình và bảng tự động.
+            \item \textbf{1.4 Trích dẫn:} MEF, RFC 3031, RFC 5036, Mininet, OVS, FRRouting, iperf3.
+            \item \textbf{1.5 Chính tả:} thống nhất thuật ngữ CE, PE, P, MPLS, LDP, VPLS.
         \end{itemize}
-        
-        \column{0.5\textwidth}
-        \textbf{VPLS/L2VPN Data-plane}
+        \column{0.48\textwidth}
+        \scriptsize
+        File minh chứng:
         \begin{itemize}
-            \item Các chi nhánh kết nối ở Layer 2 thông qua dịch vụ VPLS.
-            \item Hiện thực bằng \textbf{Linux GRETAP pseudowire} với tính năng split-horizon để ngăn vòng lặp.
+            \item \texttt{report/Bao\_cao\_Metro\_Ethernet\_MPLS\_Mininet.docx}
+            \item \texttt{../latex\_report/main.pdf}
+            \item \texttt{images/topology\_overview.png}
+            \item \texttt{../latex\_report/tailieuthamkhao.bib}
+        \end{itemize}
+        Lệnh mở nhanh:
+        \begin{itemize}
+            \item \texttt{xdg-open ../latex\_report/main.pdf}
+            \item \texttt{xdg-open images/topology\_overview.png}
         \end{itemize}
     \end{columns}
 \end{frame}
 
-\section{6. Đo lường \& Phân tích hiệu năng}
-\begin{frame}{\tdtulogo 6. Kịch bản Đo lường \& Phân tích hiệu năng}
-    Sử dụng các công cụ \textbf{ping, traceroute, iperf3} để đánh giá 4 chỉ số chính:
-    \vspace{0.3cm}
-    \begin{itemize}
-        \item \textbf{Thông lượng (Throughput):} Khả năng truyền tải tối đa.
-        \item \textbf{Độ trễ (Delay / RTT):} Thời gian gói tin đi và về.
-        \item \textbf{Độ biến thiên trễ (Jitter):} Sự dao động của độ trễ trong truyền tải UDP.
-        \item \textbf{Suy hao gói tin (Packet Loss):} Tỉ lệ gói tin bị mất, đặc biệt đo trong kịch bản tăng tải liên tục (UDP Load Sweep).
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{\tdtulogo 6. Kết quả Thông lượng \& Độ trễ}
+\section{2. Nội dung lý thuyết}
+\begin{frame}{\tdtulogo Rubric 2 - Cơ sở lý thuyết}
+    \small
     \begin{columns}
-        \column{0.5\textwidth}
-        \centering
-        \textbf{Thông lượng (Throughput)}\\
-        \vspace{0.2cm}
-        \includegraphics[width=0.9\textwidth]{image/throughput_chart.png}
-        \column{0.5\textwidth}
-        \centering
-        \textbf{Độ trễ (Delay)}\\
-        \vspace{0.2cm}
-        \includegraphics[width=0.9\textwidth]{image/delay_chart.png}
-    \end{columns}
-    \vspace{0.4cm}
-    \small Giao tiếp nội bộ chi nhánh có tốc độ rất cao ($>94$ Mbps) và trễ thấp. Giao tiếp liên chi nhánh bị giới hạn bởi năng lực mạng backbone (50-60 Mbps) và có trễ cao hơn do đi qua nhiều hop.
-\end{frame}
-
-\begin{frame}{\tdtulogo 6. Đánh giá tắc nghẽn (UDP Load Sweep)}
-    \begin{columns}
-        \column{0.45\textwidth}
+        \column{0.52\textwidth}
+        \begin{block}{Metro Ethernet và mô hình CE/PE/P}
+            CE thuộc phía khách hàng; PE là biên nhà cung cấp; P là router lõi. Metro Ethernet đóng vai trò hạ tầng MAN để nối các LAN chi nhánh qua mạng provider.
+        \end{block}
+        \begin{block}{MPLS Label Switching}
+            Ingress PE \textbf{push} label, P router \textbf{swap} label, egress PE \textbf{pop} label rồi đưa gói về CE đích.
+        \end{block}
+        \column{0.48\textwidth}
         \begin{itemize}
-            \item Tăng dần tải UDP từ 5 Mbps lên 120 Mbps.
-            \item Khi tải vượt ngưỡng chịu đựng của backbone (60 Mbps), suy hao gói tin (Packet Loss) bắt đầu xảy ra rõ rệt ở mức 80M và 120M.
-            \item Phản ánh tính trung thực của môi trường mô phỏng.
+            \item OSPF tạo underlay để PE/P biết đường đi.
+            \item LDP phân phối label động.
+            \item VPLS/L2VPN nối CE liên chi nhánh qua pseudowire.
+            \item 3 LAN được so sánh: Flat, Three-tier, Leaf-Spine.
         \end{itemize}
-        \column{0.55\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{image/packet_loss_chart.png}
+        \vspace{0.15cm}
+        \scriptsize Minh chứng: \texttt{results/frr\_control\_plane.txt}, \texttt{results/mpls\_routes.txt}
     \end{columns}
 \end{frame}
 
-\section{7. Giao diện Giám sát \& Tự động hóa}
-\begin{frame}{\tdtulogo 7. Giao diện Giám sát \& Tự động hóa}
+\section{4. Demo \& triển khai}
+\begin{frame}{\tdtulogo Rubric 4.1 - Topology \& kiến trúc}
     \begin{columns}
         \column{0.4\textwidth}
-        \textbf{Bộ công cụ tự động:}
+        \small
         \begin{itemize}
-            \item Script chạy toàn trình \texttt{run\_all.sh} xây dựng topology, sinh log.
-            \item Ứng dụng \textbf{GUI bằng Python} hỗ trợ demo trực quan.
-            \item Theo dõi trực tiếp tốc độ, ping, traceroute và vẽ biểu đồ.
+            \item \texttt{topology\_mininet.py} tạo host, switch, CE, PE, P router.
+            \item Branch 1: Flat Network cho quy mô nhỏ.
+            \item Branch 2: Three-tier cho mô hình campus.
+            \item Branch 3: Leaf-Spine cho hướng data center.
         \end{itemize}
-        
+        \scriptsize Lệnh demo: \texttt{sudo python3 code/topology\_mininet.py --mode mpls}
         \column{0.6\textwidth}
+        \centering
+        \includegraphics[width=0.9\textwidth]{image/logical_topology.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.2 - MPLS \& VPLS core}
+    \small
+    \begin{columns}
+        \column{0.5\textwidth}
+        \begin{itemize}
+            \item \texttt{network\_config.py} bật Linux kernel MPLS và cấu hình route/interface.
+            \item FRRouting chạy trong namespace PE/P với \texttt{zebra}, \texttt{ospfd}, \texttt{ldpd}.
+            \item OSPF hội tụ underlay; LDP cấp label động.
+            \item L2VPN/VPLS nối các CE qua bridge và full-mesh GRETAP pseudowire có split-horizon.
+        \end{itemize}
+        \column{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.95\textwidth]{image/mpls_backbone.png}
+        \vspace{0.1cm}
+        \scriptsize Minh chứng: \texttt{cat results/frr\_control\_plane.txt}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.3 - Xác minh chuyển nhãn MPLS}
+    \small
+    \begin{columns}
+        \column{0.52\textwidth}
+        \begin{itemize}
+            \item \texttt{tcpdump} bắt được ethertype \texttt{MPLS unicast (0x8847)}.
+            \item \texttt{mpls\_routes.txt} có \texttt{encap mpls}, \texttt{proto ldp}, \texttt{as to}.
+            \item Đây là bằng chứng gói tin đi bằng label thật, không chỉ IP routing thường.
+            \item Giải thích khi demo: push ở ingress PE, swap ở P, pop ở egress PE.
+        \end{itemize}
+        \scriptsize Lệnh: \texttt{cat results/tcpdump\_mpls.txt} và \texttt{cat results/mpls\_routes.txt}
+        \column{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image/case1_mpls_traceroute.png}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.4 - Kịch bản đo hiệu năng}
+    \small
+    \begin{itemize}
+        \item \textbf{Throughput:} iperf3 TCP giữa các cặp host nội bộ và liên chi nhánh.
+        \item \textbf{Delay:} ping RTT trung bình, parse từ output ping thật.
+        \item \textbf{Jitter:} iperf3 UDP JSON, lấy jitter theo luồng UDP.
+        \item \textbf{Packet loss:} UDP load sweep ở 5M, 20M, 50M, 80M, 120M.
+        \item \textbf{Pipeline:} \texttt{performance\_test.py} ghi \texttt{results.csv}; \texttt{plot\_results.py} sinh biểu đồ Matplotlib.
+    \end{itemize}
+    \vspace{0.2cm}
+    \scriptsize
+    Lệnh demo từng phần: \texttt{sudo python3 code/performance\_test.py --action throughput --source-host host1 --destination-host user1 --mode mpls}
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.4 - Kết quả throughput \& delay}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Throughput}\\
+        \includegraphics[width=0.94\textwidth]{image/throughput_chart.png}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Delay}\\
+        \includegraphics[width=0.94\textwidth]{image/delay_chart.png}
+    \end{columns}
+    \vspace{0.15cm}
+    \small Kết quả cho thấy lưu lượng nội bộ nhanh và trễ thấp; lưu lượng liên chi nhánh chịu giới hạn bởi backbone và số hop qua PE/P.
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.4 - Packet loss \& jitter khi tăng tải}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Packet loss}\\
+        \includegraphics[width=0.94\textwidth]{image/packet_loss_chart.png}
+        \column{0.5\textwidth}
+        \centering
+        \textbf{Jitter}\\
+        \includegraphics[width=0.94\textwidth]{image/jitter_chart.png}
+    \end{columns}
+    \vspace{0.15cm}
+    \small UDP load sweep giúp chứng minh khi offered load vượt năng lực backbone, loss và jitter tăng theo hành vi mạng thật.
+\end{frame}
+
+\begin{frame}{\tdtulogo Rubric 4.5 - Minh chứng kết quả}
+    \small
+    \begin{columns}
+        \column{0.55\textwidth}
+        Raw log có thể đối chiếu trực tiếp:
+        \begin{itemize}
+            \item \texttt{results/ping\_results.txt}: connectivity, delay, packet loss baseline.
+            \item \texttt{results/iperf\_results.txt}: throughput, jitter, UDP loss.
+            \item \texttt{results/traceroute\_results.txt}: đường đi gói tin.
+            \item \texttt{results/mpls\_routes.txt}: bảng route MPLS.
+            \item \texttt{results/tcpdump\_mpls.txt}: gói MPLS ethertype 0x8847.
+        \end{itemize}
+        \column{0.45\textwidth}
         \centering
         \includegraphics[width=\textwidth]{image/case5_performance_table_gui.png}
     \end{columns}
 \end{frame}
 
-\section{8. Kết luận}
-\begin{frame}{\tdtulogo 8. Kết luận}
+\begin{frame}{\tdtulogo Rubric 4.6 - Tự động hóa \& GUI}
+    \small
+    \begin{columns}
+        \column{0.45\textwidth}
+        \begin{itemize}
+            \item \texttt{run\_all.sh}: cleanup Mininet, vẽ sơ đồ, chạy benchmark, vẽ chart, tạo báo cáo.
+            \item \texttt{gui\_monitor.py}: chọn source/destination và chạy Ping, Traceroute, Throughput, Delay, Packet Loss, Jitter.
+            \item Cửa sổ log riêng có thể phóng to/thu nhỏ để theo dõi output lệnh.
+        \end{itemize}
+        \scriptsize Lệnh: \texttt{sudo -v} rồi \texttt{python3 code/gui\_monitor.py}
+        \column{0.55\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{image/case3_stress_test_gui.png}
+    \end{columns}
+\end{frame}
+
+\section{5. Khả năng biện luận}
+\begin{frame}{\tdtulogo Rubric 5 - Trả lời câu hỏi \& chỉnh sửa tại chỗ}
+    \small
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Câu hỏi trọng tâm}
+        \begin{itemize}
+            \item Vì sao gọi là MPLS thật?
+            \item OSPF và LDP mỗi cái làm nhiệm vụ gì?
+            \item Push/Swap/Pop label xảy ra ở đâu?
+            \item VPLS/L2VPN nối các chi nhánh như thế nào?
+            \item Số liệu benchmark lấy từ đâu?
+        \end{itemize}
+        \column{0.5\textwidth}
+        \textbf{Lệnh và file cần nắm}
+        \begin{itemize}
+            \item \texttt{cat results/frr\_control\_plane.txt}
+            \item \texttt{cat results/mpls\_routes.txt}
+            \item \texttt{cat results/tcpdump\_mpls.txt}
+            \item \texttt{code/topology\_mininet.py}
+            \item \texttt{code/network\_config.py}
+            \item \texttt{code/performance\_test.py}
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{\tdtulogo Kịch bản demo trực tiếp}
+    \small
+    \begin{enumerate}
+        \item Chuẩn bị quyền sudo: \texttt{sudo -v}
+        \item Mở GUI: \texttt{python3 code/gui\_monitor.py}
+        \item Chọn \texttt{host1} $\rightarrow$ \texttt{user1}, chạy \textbf{Ping} để chứng minh kết nối.
+        \item Chạy \textbf{Throughput} hoặc \textbf{Packet Loss} để chứng minh benchmark thật.
+        \item Bấm \textbf{Open Log Window} để phóng to output lệnh.
+        \item Nếu cần chứng minh MPLS: mở terminal và chạy \texttt{cat results/tcpdump\_mpls.txt}.
+    \end{enumerate}
+    \vspace{0.15cm}
+    \begin{block}{Câu chốt}
+        Mỗi con số trên biểu đồ đều truy ngược được về \texttt{results.csv} và raw log trong thư mục \texttt{results/}.
+    \end{block}
+\end{frame}
+
+\section*{Kết luận}
+\begin{frame}{\tdtulogo Kết luận}
+    \small
     \begin{itemize}
-        \item \textbf{Đạt được:} Triển khai thành công hệ thống Metro Ethernet quy mô đa chi nhánh với nền tảng MPLS thực tế trên Linux kernel.
-        \item \textbf{Chất lượng mạng:} Đánh giá toàn diện sự khác biệt giữa mạng nội bộ và mạng diện rộng, cũng như phản ứng của MPLS dưới áp lực tải cao.
-        \item \textbf{Tính minh bạch:} 100\% các thông số là kết quả benchmark thật, minh chứng đầy đủ qua log tcpdump và bảng định tuyến.
-        \item \textbf{Thực tiễn:} Công cụ tự động hóa và GUI giúp việc quản trị và giám sát trở nên trực quan, hiện đại.
+        \item Đã triển khai mô hình Metro Ethernet MPLS đa chi nhánh trên Mininet.
+        \item Đáp ứng 3 kiến trúc LAN: Flat, Three-tier, Leaf-Spine.
+        \item Có MPLS label switching thật: route MPLS, FRRouting OSPF/LDP, tcpdump ethertype 0x8847.
+        \item Có đo lường đầy đủ Throughput, Delay, Jitter, Packet Loss và biểu đồ so sánh.
+        \item Có pipeline tự động, GUI demo, báo cáo Word/LaTeX và raw log để đối chiếu.
     \end{itemize}
 \end{frame}
 
-\begin{frame}[plain] % Slide trơn không tiêu đề, không đánh số
+\begin{frame}[plain]
     \begin{tikzpicture}[remember picture,overlay]
     \node[anchor=north west, xshift=2mm, yshift=-2mm] at (current page.north west) {\includegraphics[height=1.2cm]{image/logo-tdtu.jpg}};
     \end{tikzpicture}
@@ -213,9 +306,7 @@
     \centering
     \Huge \textbf{XIN CHÂN THÀNH CẢM ƠN!}\\
     \vspace{1cm}
-    \Large \textbf{Thầy và các bạn đã chú ý lắng nghe.}\\
-    \vspace{1.5cm}
-    \normalsize \textit{Mời Thầy và các bạn đặt câu hỏi!}
+    \Large \textbf{Mời Thầy và các bạn đặt câu hỏi.}
 \end{frame}
 
 \end{document}

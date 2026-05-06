@@ -16,6 +16,13 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_DIR / "results"
 CSV_PATH = RESULTS_DIR / "results.csv"
 
+HIDDEN_WARNING_MARKERS = (
+    "warning:",
+    "userwarning",
+    "deprecationwarning",
+    "*** warning",
+)
+
 HOSTS = [
     "host1",
     "host2",
@@ -74,8 +81,12 @@ class MonitorApp(tk.Tk):
         self.baseline_count = tk.StringVar(value="0")
         self.sweep_count = tk.StringVar(value="0")
         self.success_count = tk.StringVar(value="0")
+        self.last_log_line = tk.StringVar(value="Chua co log.")
         self.is_running = False
         self.action_buttons: list[ttk.Button] = []
+        self.log_buffer = ""
+        self.log_window: tk.Toplevel | None = None
+        self.log_text: tk.Text | None = None
 
         self._configure_style()
         self._build_ui()
@@ -105,8 +116,48 @@ class MonitorApp(tk.Tk):
         style.map("Treeview", background=[("selected", COLORS["accent"])], foreground=[("selected", "#ffffff")])
 
     def _build_ui(self) -> None:
-        root = ttk.Frame(self, style="Root.TFrame", padding=18)
-        root.pack(fill=tk.BOTH, expand=True)
+        shell = ttk.Frame(self, style="Root.TFrame")
+        shell.pack(fill=tk.BOTH, expand=True)
+        shell.rowconfigure(0, weight=1)
+        shell.columnconfigure(0, weight=1)
+
+        canvas = tk.Canvas(shell, bg=COLORS["bg"], highlightthickness=0)
+        canvas.grid(row=0, column=0, sticky="nsew")
+
+        page_scrollbar = ttk.Scrollbar(shell, orient=tk.VERTICAL, command=canvas.yview)
+        page_scrollbar.grid(row=0, column=1, sticky="ns")
+        canvas.configure(yscrollcommand=page_scrollbar.set)
+
+        root = ttk.Frame(canvas, style="Root.TFrame", padding=18)
+        window_id = canvas.create_window((0, 0), window=root, anchor="nw")
+
+        def update_scroll_region(_event=None) -> None:
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        def fit_content_width(event) -> None:
+            canvas.itemconfigure(window_id, width=event.width)
+
+        def scroll_page(event) -> None:
+            widget = event.widget
+            nested_scroll_widgets = (getattr(self, "tree", None),)
+            while widget is not None:
+                if widget in nested_scroll_widgets:
+                    return
+                widget = getattr(widget, "master", None)
+
+            if event.num == 4:
+                canvas.yview_scroll(-1, "units")
+            elif event.num == 5:
+                canvas.yview_scroll(1, "units")
+            else:
+                canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        root.bind("<Configure>", update_scroll_region)
+        canvas.bind("<Configure>", fit_content_width)
+        canvas.bind_all("<MouseWheel>", scroll_page)
+        canvas.bind_all("<Button-4>", scroll_page)
+        canvas.bind_all("<Button-5>", scroll_page)
+
         root.columnconfigure(1, weight=1)
         root.rowconfigure(0, weight=1)
 
@@ -193,22 +244,10 @@ class MonitorApp(tk.Tk):
 
         log_panel = ttk.Frame(content, style="Surface.TFrame", padding=16)
         log_panel.grid(row=3, column=0, sticky="ew", pady=(16, 0))
-        log_panel.columnconfigure(0, weight=1)
+        log_panel.columnconfigure(1, weight=1)
         ttk.Label(log_panel, text="Log chay lenh", style="Section.TLabel").grid(row=0, column=0, sticky="w")
-        self.log = tk.Text(
-            log_panel,
-            height=11,
-            bg="#0f222a",
-            fg="#e8f3f7",
-            insertbackground="#ffffff",
-            relief=tk.FLAT,
-            font=("DejaVu Sans Mono", 9),
-            padx=12,
-            pady=10,
-            wrap=tk.WORD,
-        )
-        self.log.grid(row=1, column=0, sticky="ew", pady=(12, 0))
-        self.log.insert(tk.END, "Nen chay GUI bang sudo hoac chay `sudo -v` truoc khi bam nut test.\n")
+        ttk.Button(log_panel, text="Open Log Window", style="Ghost.TButton", command=self.open_log_window).grid(row=0, column=2, sticky="e")
+        ttk.Label(log_panel, textvariable=self.last_log_line, style="Body.TLabel").grid(row=1, column=0, columnspan=3, sticky="ew", pady=(10, 0))
 
     def _metric_card(self, parent: ttk.Frame, col: int, label: str, variable: tk.StringVar) -> None:
         card = ttk.Frame(parent, style="Surface.TFrame", padding=16)
@@ -261,8 +300,7 @@ class MonitorApp(tk.Tk):
 
     def start_worker(self, cmd: list[str], label: str) -> None:
         self.set_running(True)
-        self.log.insert(tk.END, f"\n=== {label} ===\n{' '.join(cmd)}\n")
-        self.log.see(tk.END)
+        self.append_log(f"\n=== {label} ===\n{' '.join(cmd)}\n")
         thread = threading.Thread(target=self._run_command_worker, args=(cmd,), daemon=True)
         thread.start()
 
@@ -272,8 +310,9 @@ class MonitorApp(tk.Tk):
         self.after(0, lambda: self._finish_run(proc.returncode, output))
 
     def _finish_run(self, returncode: int, output: str) -> None:
-        self.log.insert(tk.END, output + "\n")
-        self.log.see(tk.END)
+        display_output = self.clean_command_output(output)
+        if display_output:
+            self.append_log(display_output + "\n")
         self.set_running(False)
         if returncode == 0:
             self.status.set("Hoan tat. Ket qua vua chay la lenh that trong namespace Mininet.")
@@ -329,6 +368,94 @@ class MonitorApp(tk.Tk):
             return f"{float(value):.3g}"
         except ValueError:
             return value
+
+    @staticmethod
+    def clean_command_output(output: str) -> str:
+        cleaned_lines = []
+        for line in output.splitlines():
+            lowered = line.lower()
+            if any(marker in lowered for marker in HIDDEN_WARNING_MARKERS):
+                continue
+            cleaned_lines.append(line)
+        return "\n".join(cleaned_lines).strip()
+
+    def append_log(self, text: str) -> None:
+        self.log_buffer += text
+        last_line = next((line for line in reversed(self.log_buffer.splitlines()) if line.strip()), "Chua co log.")
+        self.last_log_line.set(last_line[:140])
+        if self.log_text is None:
+            return
+        self.log_text.configure(state=tk.NORMAL)
+        self.log_text.insert(tk.END, text)
+        self.log_text.configure(state=tk.DISABLED)
+        self.log_text.see(tk.END)
+
+    def clear_log(self) -> None:
+        self.log_buffer = ""
+        self.last_log_line.set("Chua co log.")
+        if self.log_text is None:
+            return
+        self.log_text.configure(state=tk.NORMAL)
+        self.log_text.delete("1.0", tk.END)
+        self.log_text.configure(state=tk.DISABLED)
+
+    def open_log_window(self) -> None:
+        if self.log_window is not None and self.log_window.winfo_exists():
+            self.log_window.lift()
+            self.log_window.focus_force()
+            return
+
+        window = tk.Toplevel(self)
+        window.title("Log chay lenh")
+        window.geometry("980x620")
+        window.minsize(720, 420)
+        window.configure(bg=COLORS["bg"])
+        window.rowconfigure(1, weight=1)
+        window.columnconfigure(0, weight=1)
+
+        toolbar = ttk.Frame(window, style="Root.TFrame", padding=(14, 12, 14, 8))
+        toolbar.grid(row=0, column=0, sticky="ew")
+        toolbar.columnconfigure(0, weight=1)
+        ttk.Label(toolbar, text="Log chay lenh", style="Status.TLabel").grid(row=0, column=0, sticky="w")
+        ttk.Button(toolbar, text="Clear", style="Ghost.TButton", command=self.clear_log).grid(row=0, column=1, sticky="e")
+
+        log_frame = ttk.Frame(window, style="Root.TFrame", padding=(14, 0, 14, 14))
+        log_frame.grid(row=1, column=0, sticky="nsew")
+        log_frame.rowconfigure(0, weight=1)
+        log_frame.columnconfigure(0, weight=1)
+
+        text = tk.Text(
+            log_frame,
+            bg="#0f222a",
+            fg="#e8f3f7",
+            insertbackground="#ffffff",
+            relief=tk.FLAT,
+            font=("DejaVu Sans Mono", 10),
+            padx=12,
+            pady=10,
+            wrap=tk.NONE,
+        )
+        text.grid(row=0, column=0, sticky="nsew")
+
+        y_scrollbar = ttk.Scrollbar(log_frame, orient=tk.VERTICAL, command=text.yview)
+        y_scrollbar.grid(row=0, column=1, sticky="ns")
+        x_scrollbar = ttk.Scrollbar(log_frame, orient=tk.HORIZONTAL, command=text.xview)
+        x_scrollbar.grid(row=1, column=0, sticky="ew")
+        text.configure(yscrollcommand=y_scrollbar.set, xscrollcommand=x_scrollbar.set)
+
+        text.insert(tk.END, self.log_buffer)
+        text.configure(state=tk.DISABLED)
+        text.see(tk.END)
+
+        self.log_window = window
+        self.log_text = text
+
+        def on_close() -> None:
+            self.log_text = None
+            self.log_window = None
+            window.destroy()
+
+        window.protocol("WM_DELETE_WINDOW", on_close)
 
     def open_images_dir(self) -> None:
         subprocess.Popen(["xdg-open", str(PROJECT_DIR / "images")])

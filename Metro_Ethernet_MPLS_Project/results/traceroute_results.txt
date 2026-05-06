@@ -28,3 +28,15 @@ traceroute to 10.2.0.31 (10.2.0.31), 30 hops max, 60 byte packets
 ===== svr1 -> 10.3.0.21 =====
 traceroute to 10.3.0.21 (10.3.0.21), 30 hops max, 60 byte packets
  1  10.3.0.21  10.567 ms
+
+===== host1 -> 10.2.0.21 =====
+traceroute to 10.2.0.21 (10.2.0.21), 30 hops max, 60 byte packets
+ 1  10.1.0.1  9.703 ms
+ 2  172.16.100.2  50.830 ms
+ 3  10.2.0.21  68.665 ms
+
+===== host1 -> 10.2.0.21 =====
+traceroute to 10.2.0.21 (10.2.0.21), 30 hops max, 60 byte packets
+ 1  10.1.0.1  9.538 ms
+ 2  172.16.100.2  51.122 ms
+ 3  10.2.0.21  69.114 ms

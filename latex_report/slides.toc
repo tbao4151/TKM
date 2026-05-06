@@ -1,0 +1,5 @@
+\babel@toc {vietnamese}{}\relax 
+\beamer@sectionintoc {2}{1. Hình thức}{4}{0}{1}
+\beamer@sectionintoc {3}{2. Nội dung lý thuyết}{5}{0}{2}
+\beamer@sectionintoc {4}{4. Demo \& triển khai}{6}{0}{3}
+\beamer@sectionintoc {5}{5. Khả năng biện luận}{14}{0}{4}
