@@ -1,4 +1,4 @@
-Environment check time: 2026-05-05T20:28:28+07:00
+Environment check time: 2026-05-06T17:37:06+07:00
 OS information:
 Distributor ID:	Ubuntu
 Description:	Ubuntu 24.04.1 LTS
@@ -27,7 +27,7 @@ vtysh: unrecognized option '--version'
 
 Linux MPLS kernel status:
 mpls_gso               12288  0
-mpls_iptunnel          16384  13
+mpls_iptunnel          16384  3
 mpls_router            45056  1 mpls_iptunnel
 net.mpls.platform_labels = 100000
 

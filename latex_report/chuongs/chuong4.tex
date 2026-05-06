@@ -15,6 +15,16 @@ sudo bash code/run_all.sh
 
 Script thực hiện cleanup Mininet, kiểm tra môi trường, vẽ topology, dựng mạng MPLS, chạy ping/traceroute/iperf3/tcpdump, sinh \texttt{results.csv}, vẽ biểu đồ và tạo báo cáo Word.
 
+\subsection{Giao diện giám sát và demo}
+
+Bên cạnh các lệnh terminal, project có giao diện Tkinter để chọn cặp host nguồn--đích và chạy trực tiếp các phép đo ping, traceroute, throughput, delay, packet loss và jitter. Cửa sổ log được tách riêng để có thể phóng to/thu nhỏ khi cần quan sát toàn bộ output lệnh trong lúc thuyết trình.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\linewidth]{image/giaodiengui.png}
+    \caption{Giao diện GUI monitor dùng trong phần demo}
+\end{figure}
+
 \subsection{Cấu hình MPLS kernel native}
 
 MPLS và VPLS/L2VPN được cấu hình trong \texttt{code/network\_config.py}. Backbone PE/P chạy FRRouting OSPF/LDP để sinh route và label động. Các CE dùng WAN chung \texttt{172.16.100.0/24}; PE access interface không giữ IP khách hàng mà được đưa vào bridge VPLS/L2VPN. Data-plane L2VPN trong Mininet dùng full-mesh Linux GRETAP pseudowire có split-horizon/port-isolation trên underlay MPLS.

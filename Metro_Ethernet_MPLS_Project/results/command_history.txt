@@ -1,145 +1,116 @@
-Test run started: 2026-05-05T20:28:37 | mode=mpls
-2026-05-05T20:28:37 | Starting Mininet topology for real performance tests in mpls mode
-2026-05-05T20:29:10 | Topology started and configured; running precheck pings
-2026-05-05T20:29:16 | Precheck host1 -> user1: OK
-2026-05-05T20:29:16 | Precheck host2 -> svr1: OK
-2026-05-05T20:29:16 | Precheck user1 -> svr2: OK
-2026-05-05T20:29:16 | Precheck host1 -> host4: OK
-2026-05-05T20:29:16 | Precheck admin1 -> guest1: OK
-2026-05-05T20:29:16 | Precheck svr1 -> os1: OK
-2026-05-05T20:29:16 | Saving Linux kernel MPLS route tables
-2026-05-05T20:29:16 | Saving FRRouting OSPF/LDP control-plane state
-2026-05-05T20:29:17 | Capturing real MPLS packets on p3-eth0
-2026-05-05T20:29:23 | Testing Branch1 -> Branch2: host1 -> user1
-2026-05-05T20:29:23 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-05T20:29:30 | host1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.21
-2026-05-05T20:29:30 | Running iperf3 TCP for host1 -> user1
-2026-05-05T20:29:31 | user1: timeout 25s iperf3 -s -1 -p 5201
-2026-05-05T20:29:31 | host1: timeout 18s iperf3 -c 10.2.0.21 -p 5201 -t 5 -J
-2026-05-05T20:29:36 | Running iperf3 UDP jitter for host1 -> user1
-2026-05-05T20:29:36 | user1: timeout 25s iperf3 -s -1 -p 5301
-2026-05-05T20:29:36 | host1: timeout 18s iperf3 -u -b 10M -c 10.2.0.21 -p 5301 -t 5 -J
-2026-05-05T20:29:41 | Testing Branch1 -> Branch3: host2 -> svr1
-2026-05-05T20:29:41 | host2: timeout 25s ping -c 8 -W 2 10.3.0.11
-2026-05-05T20:29:48 | host2: timeout 20s traceroute -n -w 2 -q 1 10.3.0.11
-2026-05-05T20:29:48 | Running iperf3 TCP for host2 -> svr1
-2026-05-05T20:29:48 | svr1: timeout 25s iperf3 -s -1 -p 5202
-2026-05-05T20:29:48 | host2: timeout 18s iperf3 -c 10.3.0.11 -p 5202 -t 5 -J
-2026-05-05T20:29:53 | Running iperf3 UDP jitter for host2 -> svr1
-2026-05-05T20:29:53 | svr1: timeout 25s iperf3 -s -1 -p 5302
-2026-05-05T20:29:53 | host2: timeout 18s iperf3 -u -b 10M -c 10.3.0.11 -p 5302 -t 5 -J
-2026-05-05T20:29:59 | Testing Branch2 -> Branch3: user1 -> svr2
-2026-05-05T20:29:59 | user1: timeout 25s ping -c 8 -W 2 10.3.0.12
-2026-05-05T20:30:06 | user1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.12
-2026-05-05T20:30:06 | Running iperf3 TCP for user1 -> svr2
-2026-05-05T20:30:06 | svr2: timeout 25s iperf3 -s -1 -p 5203
-2026-05-05T20:30:06 | user1: timeout 18s iperf3 -c 10.3.0.12 -p 5203 -t 5 -J
-2026-05-05T20:30:11 | Running iperf3 UDP jitter for user1 -> svr2
-2026-05-05T20:30:11 | svr2: timeout 25s iperf3 -s -1 -p 5303
-2026-05-05T20:30:11 | user1: timeout 18s iperf3 -u -b 10M -c 10.3.0.12 -p 5303 -t 5 -J
-2026-05-05T20:30:16 | Testing Branch1 -> Branch1: host1 -> host4
-2026-05-05T20:30:16 | host1: timeout 25s ping -c 8 -W 2 10.1.0.14
-2026-05-05T20:30:23 | host1: timeout 20s traceroute -n -w 2 -q 1 10.1.0.14
-2026-05-05T20:30:23 | Running iperf3 TCP for host1 -> host4
-2026-05-05T20:30:23 | host4: timeout 25s iperf3 -s -1 -p 5204
-2026-05-05T20:30:23 | host1: timeout 18s iperf3 -c 10.1.0.14 -p 5204 -t 5 -J
-2026-05-05T20:30:29 | Running iperf3 UDP jitter for host1 -> host4
-2026-05-05T20:30:29 | host4: timeout 25s iperf3 -s -1 -p 5304
-2026-05-05T20:30:29 | host1: timeout 18s iperf3 -u -b 10M -c 10.1.0.14 -p 5304 -t 5 -J
-2026-05-05T20:30:34 | Testing Branch2 -> Branch2: admin1 -> guest1
-2026-05-05T20:30:34 | admin1: timeout 25s ping -c 8 -W 2 10.2.0.31
-2026-05-05T20:30:41 | admin1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.31
-2026-05-05T20:30:41 | Running iperf3 TCP for admin1 -> guest1
-2026-05-05T20:30:41 | guest1: timeout 25s iperf3 -s -1 -p 5205
-2026-05-05T20:30:41 | admin1: timeout 18s iperf3 -c 10.2.0.31 -p 5205 -t 5 -J
-2026-05-05T20:30:46 | Running iperf3 UDP jitter for admin1 -> guest1
-2026-05-05T20:30:46 | guest1: timeout 25s iperf3 -s -1 -p 5305
-2026-05-05T20:30:46 | admin1: timeout 18s iperf3 -u -b 10M -c 10.2.0.31 -p 5305 -t 5 -J
-2026-05-05T20:30:51 | Testing Branch3 -> Branch3: svr1 -> os1
-2026-05-05T20:30:51 | svr1: timeout 25s ping -c 8 -W 2 10.3.0.21
-2026-05-05T20:30:59 | svr1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.21
-2026-05-05T20:30:59 | Running iperf3 TCP for svr1 -> os1
-2026-05-05T20:30:59 | os1: timeout 25s iperf3 -s -1 -p 5206
-2026-05-05T20:30:59 | svr1: timeout 18s iperf3 -c 10.3.0.21 -p 5206 -t 5 -J
-2026-05-05T20:31:04 | Running iperf3 UDP jitter for svr1 -> os1
-2026-05-05T20:31:04 | os1: timeout 25s iperf3 -s -1 -p 5306
-2026-05-05T20:31:04 | svr1: timeout 18s iperf3 -u -b 10M -c 10.3.0.21 -p 5306 -t 5 -J
-2026-05-05T20:31:09 | Running UDP load sweep host1 -> user1 at 5 Mbps
-2026-05-05T20:31:09 | user1: timeout 25s iperf3 -s -1 -p 6211
-2026-05-05T20:31:09 | host1: timeout 18s iperf3 -u -b 5M -c 10.2.0.21 -p 6211 -t 5 -J
-2026-05-05T20:31:15 | Running UDP load sweep host1 -> user1 at 20 Mbps
-2026-05-05T20:31:15 | user1: timeout 25s iperf3 -s -1 -p 6212
-2026-05-05T20:31:15 | host1: timeout 18s iperf3 -u -b 20M -c 10.2.0.21 -p 6212 -t 5 -J
-2026-05-05T20:31:20 | Running UDP load sweep host1 -> user1 at 50 Mbps
-2026-05-05T20:31:20 | user1: timeout 25s iperf3 -s -1 -p 6213
-2026-05-05T20:31:20 | host1: timeout 18s iperf3 -u -b 50M -c 10.2.0.21 -p 6213 -t 5 -J
-2026-05-05T20:31:25 | Running UDP load sweep host1 -> user1 at 80 Mbps
-2026-05-05T20:31:25 | user1: timeout 25s iperf3 -s -1 -p 6214
-2026-05-05T20:31:25 | host1: timeout 18s iperf3 -u -b 80M -c 10.2.0.21 -p 6214 -t 5 -J
-2026-05-05T20:31:31 | Running UDP load sweep host1 -> user1 at 120 Mbps
-2026-05-05T20:31:31 | user1: timeout 25s iperf3 -s -1 -p 6215
-2026-05-05T20:31:31 | host1: timeout 18s iperf3 -u -b 120M -c 10.2.0.21 -p 6215 -t 5 -J
-2026-05-05T20:31:37 | Running UDP load sweep host2 -> svr1 at 5 Mbps
-2026-05-05T20:31:37 | svr1: timeout 25s iperf3 -s -1 -p 6221
-2026-05-05T20:31:37 | host2: timeout 18s iperf3 -u -b 5M -c 10.3.0.11 -p 6221 -t 5 -J
-2026-05-05T20:31:42 | Running UDP load sweep host2 -> svr1 at 20 Mbps
-2026-05-05T20:31:42 | svr1: timeout 25s iperf3 -s -1 -p 6222
-2026-05-05T20:31:42 | host2: timeout 18s iperf3 -u -b 20M -c 10.3.0.11 -p 6222 -t 5 -J
-2026-05-05T20:31:47 | Running UDP load sweep host2 -> svr1 at 50 Mbps
-2026-05-05T20:31:47 | svr1: timeout 25s iperf3 -s -1 -p 6223
-2026-05-05T20:31:47 | host2: timeout 18s iperf3 -u -b 50M -c 10.3.0.11 -p 6223 -t 5 -J
-2026-05-05T20:31:53 | Running UDP load sweep host2 -> svr1 at 80 Mbps
-2026-05-05T20:31:53 | svr1: timeout 25s iperf3 -s -1 -p 6224
-2026-05-05T20:31:53 | host2: timeout 18s iperf3 -u -b 80M -c 10.3.0.11 -p 6224 -t 5 -J
-2026-05-05T20:31:58 | Running UDP load sweep host2 -> svr1 at 120 Mbps
-2026-05-05T20:31:59 | svr1: timeout 25s iperf3 -s -1 -p 6225
-2026-05-05T20:31:59 | host2: timeout 18s iperf3 -u -b 120M -c 10.3.0.11 -p 6225 -t 5 -J
-2026-05-05T20:32:04 | Running UDP load sweep user1 -> svr2 at 5 Mbps
-2026-05-05T20:32:04 | svr2: timeout 25s iperf3 -s -1 -p 6231
-2026-05-05T20:32:04 | user1: timeout 18s iperf3 -u -b 5M -c 10.3.0.12 -p 6231 -t 5 -J
-2026-05-05T20:32:10 | Running UDP load sweep user1 -> svr2 at 20 Mbps
-2026-05-05T20:32:10 | svr2: timeout 25s iperf3 -s -1 -p 6232
-2026-05-05T20:32:10 | user1: timeout 18s iperf3 -u -b 20M -c 10.3.0.12 -p 6232 -t 5 -J
-2026-05-05T20:32:15 | Running UDP load sweep user1 -> svr2 at 50 Mbps
-2026-05-05T20:32:15 | svr2: timeout 25s iperf3 -s -1 -p 6233
-2026-05-05T20:32:15 | user1: timeout 18s iperf3 -u -b 50M -c 10.3.0.12 -p 6233 -t 5 -J
-2026-05-05T20:32:20 | Running UDP load sweep user1 -> svr2 at 80 Mbps
-2026-05-05T20:32:20 | svr2: timeout 25s iperf3 -s -1 -p 6234
-2026-05-05T20:32:20 | user1: timeout 18s iperf3 -u -b 80M -c 10.3.0.12 -p 6234 -t 5 -J
-2026-05-05T20:32:26 | Running UDP load sweep user1 -> svr2 at 120 Mbps
-2026-05-05T20:32:26 | svr2: timeout 25s iperf3 -s -1 -p 6235
-2026-05-05T20:32:26 | user1: timeout 18s iperf3 -u -b 120M -c 10.3.0.12 -p 6235 -t 5 -J
-2026-05-05T20:32:31 | Stopping Mininet topology
-Test run finished: 2026-05-05T20:32:33 | mode=mpls
-2026-05-05T20:32:33+07:00 | python3 code/plot_results.py
-2026-05-05T20:32:34+07:00 | python3 code/generate_report.py
-run_all finished: 2026-05-05T20:32:35+07:00
-2026-05-05T22:30:37 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-05T22:31:16 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-05T22:31:25 | Stopping Mininet topology
-2026-05-05T22:33:23 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-05T22:33:53 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-05T22:34:00 | Stopping Mininet topology
-2026-05-06T16:39:51 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:40:21 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-06T16:40:28 | Stopping Mininet topology
-2026-05-06T16:40:44 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:41:13 | host1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.21
-2026-05-06T16:41:13 | Stopping Mininet topology
-2026-05-06T16:45:07 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:45:36 | user1: timeout 25s iperf3 -s -1 -p 7201
-2026-05-06T16:45:36 | host1: timeout 18s iperf3 -c 10.2.0.21 -p 7201 -t 5 -J
-2026-05-06T16:45:41 | Stopping Mininet topology
-2026-05-06T16:46:10 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:46:38 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-06T16:46:46 | Stopping Mininet topology
-2026-05-06T16:57:04 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:57:32 | host1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.21
-2026-05-06T16:57:32 | Stopping Mininet topology
-2026-05-06T16:57:38 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T16:58:07 | user1: timeout 25s iperf3 -s -1 -p 7201
-2026-05-06T16:58:07 | host1: timeout 18s iperf3 -c 10.2.0.21 -p 7201 -t 5 -J
-2026-05-06T16:58:12 | Stopping Mininet topology
-2026-05-06T17:04:23 | Starting Mininet topology for GUI/one-shot action in mpls mode
-2026-05-06T17:04:52 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
-2026-05-06T17:04:59 | Stopping Mininet topology
+Test run started: 2026-05-06T17:37:14 | mode=mpls
+2026-05-06T17:37:14 | Starting Mininet topology for real performance tests in mpls mode
+2026-05-06T17:37:44 | Topology started and configured; running precheck pings
+2026-05-06T17:37:50 | Precheck host1 -> user1: OK
+2026-05-06T17:37:50 | Precheck host2 -> svr1: OK
+2026-05-06T17:37:50 | Precheck user1 -> svr2: OK
+2026-05-06T17:37:50 | Precheck host1 -> host4: OK
+2026-05-06T17:37:50 | Precheck admin1 -> guest1: OK
+2026-05-06T17:37:50 | Precheck svr1 -> os1: OK
+2026-05-06T17:37:50 | Saving Linux kernel MPLS route tables
+2026-05-06T17:37:50 | Saving FRRouting OSPF/LDP control-plane state
+2026-05-06T17:37:51 | Capturing real MPLS packets on p3-eth0
+2026-05-06T17:37:58 | Testing Branch1 -> Branch2: host1 -> user1
+2026-05-06T17:37:58 | host1: timeout 25s ping -c 8 -W 2 10.2.0.21
+2026-05-06T17:38:05 | host1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.21
+2026-05-06T17:38:05 | Running iperf3 TCP for host1 -> user1
+2026-05-06T17:38:05 | user1: timeout 25s iperf3 -s -1 -p 5201
+2026-05-06T17:38:05 | host1: timeout 18s iperf3 -c 10.2.0.21 -p 5201 -t 5 -J
+2026-05-06T17:38:10 | Running iperf3 UDP jitter for host1 -> user1
+2026-05-06T17:38:10 | user1: timeout 25s iperf3 -s -1 -p 5301
+2026-05-06T17:38:10 | host1: timeout 18s iperf3 -u -b 10M -c 10.2.0.21 -p 5301 -t 5 -J
+2026-05-06T17:38:15 | Testing Branch1 -> Branch3: host2 -> svr1
+2026-05-06T17:38:15 | host2: timeout 25s ping -c 8 -W 2 10.3.0.11
+2026-05-06T17:38:22 | host2: timeout 20s traceroute -n -w 2 -q 1 10.3.0.11
+2026-05-06T17:38:22 | Running iperf3 TCP for host2 -> svr1
+2026-05-06T17:38:22 | svr1: timeout 25s iperf3 -s -1 -p 5202
+2026-05-06T17:38:22 | host2: timeout 18s iperf3 -c 10.3.0.11 -p 5202 -t 5 -J
+2026-05-06T17:38:28 | Running iperf3 UDP jitter for host2 -> svr1
+2026-05-06T17:38:28 | svr1: timeout 25s iperf3 -s -1 -p 5302
+2026-05-06T17:38:28 | host2: timeout 18s iperf3 -u -b 10M -c 10.3.0.11 -p 5302 -t 5 -J
+2026-05-06T17:38:33 | Testing Branch2 -> Branch3: user1 -> svr2
+2026-05-06T17:38:33 | user1: timeout 25s ping -c 8 -W 2 10.3.0.12
+2026-05-06T17:38:40 | user1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.12
+2026-05-06T17:38:40 | Running iperf3 TCP for user1 -> svr2
+2026-05-06T17:38:40 | svr2: timeout 25s iperf3 -s -1 -p 5203
+2026-05-06T17:38:40 | user1: timeout 18s iperf3 -c 10.3.0.12 -p 5203 -t 5 -J
+2026-05-06T17:38:45 | Running iperf3 UDP jitter for user1 -> svr2
+2026-05-06T17:38:45 | svr2: timeout 25s iperf3 -s -1 -p 5303
+2026-05-06T17:38:45 | user1: timeout 18s iperf3 -u -b 10M -c 10.3.0.12 -p 5303 -t 5 -J
+2026-05-06T17:38:50 | Testing Branch1 -> Branch1: host1 -> host4
+2026-05-06T17:38:50 | host1: timeout 25s ping -c 8 -W 2 10.1.0.14
+2026-05-06T17:38:57 | host1: timeout 20s traceroute -n -w 2 -q 1 10.1.0.14
+2026-05-06T17:38:57 | Running iperf3 TCP for host1 -> host4
+2026-05-06T17:38:57 | host4: timeout 25s iperf3 -s -1 -p 5204
+2026-05-06T17:38:57 | host1: timeout 18s iperf3 -c 10.1.0.14 -p 5204 -t 5 -J
+2026-05-06T17:39:03 | Running iperf3 UDP jitter for host1 -> host4
+2026-05-06T17:39:03 | host4: timeout 25s iperf3 -s -1 -p 5304
+2026-05-06T17:39:03 | host1: timeout 18s iperf3 -u -b 10M -c 10.1.0.14 -p 5304 -t 5 -J
+2026-05-06T17:39:08 | Testing Branch2 -> Branch2: admin1 -> guest1
+2026-05-06T17:39:08 | admin1: timeout 25s ping -c 8 -W 2 10.2.0.31
+2026-05-06T17:39:15 | admin1: timeout 20s traceroute -n -w 2 -q 1 10.2.0.31
+2026-05-06T17:39:15 | Running iperf3 TCP for admin1 -> guest1
+2026-05-06T17:39:15 | guest1: timeout 25s iperf3 -s -1 -p 5205
+2026-05-06T17:39:15 | admin1: timeout 18s iperf3 -c 10.2.0.31 -p 5205 -t 5 -J
+2026-05-06T17:39:21 | Running iperf3 UDP jitter for admin1 -> guest1
+2026-05-06T17:39:21 | guest1: timeout 25s iperf3 -s -1 -p 5305
+2026-05-06T17:39:21 | admin1: timeout 18s iperf3 -u -b 10M -c 10.2.0.31 -p 5305 -t 5 -J
+2026-05-06T17:39:26 | Testing Branch3 -> Branch3: svr1 -> os1
+2026-05-06T17:39:26 | svr1: timeout 25s ping -c 8 -W 2 10.3.0.21
+2026-05-06T17:39:33 | svr1: timeout 20s traceroute -n -w 2 -q 1 10.3.0.21
+2026-05-06T17:39:33 | Running iperf3 TCP for svr1 -> os1
+2026-05-06T17:39:33 | os1: timeout 25s iperf3 -s -1 -p 5206
+2026-05-06T17:39:33 | svr1: timeout 18s iperf3 -c 10.3.0.21 -p 5206 -t 5 -J
+2026-05-06T17:39:39 | Running iperf3 UDP jitter for svr1 -> os1
+2026-05-06T17:39:39 | os1: timeout 25s iperf3 -s -1 -p 5306
+2026-05-06T17:39:39 | svr1: timeout 18s iperf3 -u -b 10M -c 10.3.0.21 -p 5306 -t 5 -J
+2026-05-06T17:39:44 | Running UDP load sweep host1 -> user1 at 5 Mbps
+2026-05-06T17:39:44 | user1: timeout 25s iperf3 -s -1 -p 6211
+2026-05-06T17:39:44 | host1: timeout 18s iperf3 -u -b 5M -c 10.2.0.21 -p 6211 -t 5 -J
+2026-05-06T17:39:49 | Running UDP load sweep host1 -> user1 at 20 Mbps
+2026-05-06T17:39:49 | user1: timeout 25s iperf3 -s -1 -p 6212
+2026-05-06T17:39:49 | host1: timeout 18s iperf3 -u -b 20M -c 10.2.0.21 -p 6212 -t 5 -J
+2026-05-06T17:39:54 | Running UDP load sweep host1 -> user1 at 50 Mbps
+2026-05-06T17:39:54 | user1: timeout 25s iperf3 -s -1 -p 6213
+2026-05-06T17:39:54 | host1: timeout 18s iperf3 -u -b 50M -c 10.2.0.21 -p 6213 -t 5 -J
+2026-05-06T17:39:59 | Running UDP load sweep host1 -> user1 at 80 Mbps
+2026-05-06T17:39:59 | user1: timeout 25s iperf3 -s -1 -p 6214
+2026-05-06T17:39:59 | host1: timeout 18s iperf3 -u -b 80M -c 10.2.0.21 -p 6214 -t 5 -J
+2026-05-06T17:40:05 | Running UDP load sweep host1 -> user1 at 120 Mbps
+2026-05-06T17:40:05 | user1: timeout 25s iperf3 -s -1 -p 6215
+2026-05-06T17:40:05 | host1: timeout 18s iperf3 -u -b 120M -c 10.2.0.21 -p 6215 -t 5 -J
+2026-05-06T17:40:11 | Running UDP load sweep host2 -> svr1 at 5 Mbps
+2026-05-06T17:40:11 | svr1: timeout 25s iperf3 -s -1 -p 6221
+2026-05-06T17:40:11 | host2: timeout 18s iperf3 -u -b 5M -c 10.3.0.11 -p 6221 -t 5 -J
+2026-05-06T17:40:16 | Running UDP load sweep host2 -> svr1 at 20 Mbps
+2026-05-06T17:40:16 | svr1: timeout 25s iperf3 -s -1 -p 6222
+2026-05-06T17:40:16 | host2: timeout 18s iperf3 -u -b 20M -c 10.3.0.11 -p 6222 -t 5 -J
+2026-05-06T17:40:22 | Running UDP load sweep host2 -> svr1 at 50 Mbps
+2026-05-06T17:40:22 | svr1: timeout 25s iperf3 -s -1 -p 6223
+2026-05-06T17:40:22 | host2: timeout 18s iperf3 -u -b 50M -c 10.3.0.11 -p 6223 -t 5 -J
+2026-05-06T17:40:27 | Running UDP load sweep host2 -> svr1 at 80 Mbps
+2026-05-06T17:40:27 | svr1: timeout 25s iperf3 -s -1 -p 6224
+2026-05-06T17:40:27 | host2: timeout 18s iperf3 -u -b 80M -c 10.3.0.11 -p 6224 -t 5 -J
+2026-05-06T17:40:33 | Running UDP load sweep host2 -> svr1 at 120 Mbps
+2026-05-06T17:40:33 | svr1: timeout 25s iperf3 -s -1 -p 6225
+2026-05-06T17:40:33 | host2: timeout 18s iperf3 -u -b 120M -c 10.3.0.11 -p 6225 -t 5 -J
+2026-05-06T17:40:38 | Running UDP load sweep user1 -> svr2 at 5 Mbps
+2026-05-06T17:40:38 | svr2: timeout 25s iperf3 -s -1 -p 6231
+2026-05-06T17:40:38 | user1: timeout 18s iperf3 -u -b 5M -c 10.3.0.12 -p 6231 -t 5 -J
+2026-05-06T17:40:44 | Running UDP load sweep user1 -> svr2 at 20 Mbps
+2026-05-06T17:40:44 | svr2: timeout 25s iperf3 -s -1 -p 6232
+2026-05-06T17:40:44 | user1: timeout 18s iperf3 -u -b 20M -c 10.3.0.12 -p 6232 -t 5 -J
+2026-05-06T17:40:49 | Running UDP load sweep user1 -> svr2 at 50 Mbps
+2026-05-06T17:40:49 | svr2: timeout 25s iperf3 -s -1 -p 6233
+2026-05-06T17:40:49 | user1: timeout 18s iperf3 -u -b 50M -c 10.3.0.12 -p 6233 -t 5 -J
+2026-05-06T17:40:54 | Running UDP load sweep user1 -> svr2 at 80 Mbps
+2026-05-06T17:40:54 | svr2: timeout 25s iperf3 -s -1 -p 6234
+2026-05-06T17:40:54 | user1: timeout 18s iperf3 -u -b 80M -c 10.3.0.12 -p 6234 -t 5 -J
+2026-05-06T17:41:00 | Running UDP load sweep user1 -> svr2 at 120 Mbps
+2026-05-06T17:41:00 | svr2: timeout 25s iperf3 -s -1 -p 6235
+2026-05-06T17:41:00 | user1: timeout 18s iperf3 -u -b 120M -c 10.3.0.12 -p 6235 -t 5 -J
+2026-05-06T17:41:10 | Stopping Mininet topology
+Test run finished: 2026-05-06T17:41:11 | mode=mpls
+2026-05-06T17:41:11+07:00 | python3 code/plot_results.py
+2026-05-06T17:41:12+07:00 | python3 code/generate_report.py
+run_all finished: 2026-05-06T17:41:13+07:00

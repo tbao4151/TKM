@@ -168,6 +168,13 @@ def main():
         "Cac node router la Linux namespace bat IP forwarding. Cac LAN switch dung Open vSwitch standalone. File topology_mininet.py co CLI de demo thu cong."
     )
 
+    add_heading(doc, "11.1 Giao dien giam sat va demo truc quan", level=2)
+    doc.add_paragraph(
+        "GUI Tkinter cho phep chon source/destination host va chay truc tiep cac phep do ping, traceroute, throughput, delay, packet loss va jitter. "
+        "Cua so log rieng giup phong to/thu nho output lenh khi thuyet trinh."
+    )
+    add_image(doc, "giaodiengui.png", "Hinh 6. Giao dien GUI monitor dung de demo cac phep do.")
+
     add_heading(doc, "12. Cau hinh dinh tuyen/forwarding")
     doc.add_paragraph(
         "Mode MPLS su dung Linux kernel MPLS that: FRRouting OSPF/LDP tao route loopback PE/P va label dong; traffic CE lien chi nhanh di qua service VPLS/L2VPN. "
@@ -202,10 +209,10 @@ def main():
         add_results_table(doc, load_sweep_df)
 
     add_heading(doc, "16. Bieu do so sanh hieu nang")
-    add_image(doc, "throughput_chart.png", "Hinh 6. Throughput.")
-    add_image(doc, "delay_chart.png", "Hinh 7. Delay trung binh.")
-    add_image(doc, "packet_loss_chart.png", "Hinh 8. UDP packet loss khi tai mang tang.")
-    add_image(doc, "jitter_chart.png", "Hinh 9. Jitter.")
+    add_image(doc, "throughput_chart.png", "Hinh 7. Throughput.")
+    add_image(doc, "delay_chart.png", "Hinh 8. Delay trung binh.")
+    add_image(doc, "packet_loss_chart.png", "Hinh 9. UDP packet loss khi tai mang tang.")
+    add_image(doc, "jitter_chart.png", "Hinh 10. Jitter.")
 
     add_heading(doc, "17. Phan tich anh huong cua tung kien truc LAN")
     doc.add_paragraph(
