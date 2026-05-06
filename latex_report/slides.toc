@@ -1,5 +1,9 @@
 \babel@toc {vietnamese}{}\relax 
-\beamer@sectionintoc {2}{1. Hình thức}{4}{0}{1}
-\beamer@sectionintoc {3}{2. Nội dung lý thuyết}{5}{0}{2}
-\beamer@sectionintoc {4}{4. Demo \& triển khai}{6}{0}{3}
-\beamer@sectionintoc {5}{5. Khả năng biện luận}{14}{0}{4}
+\beamer@sectionintoc {1}{1. Mở đầu \& Giới thiệu}{3}{0}{1}
+\beamer@sectionintoc {2}{2. Thiết kế Kiến trúc mạng LAN}{4}{0}{2}
+\beamer@sectionintoc {3}{3. Thiết kế Mô hình tổng thể (Topology)}{5}{0}{3}
+\beamer@sectionintoc {4}{4. Cơ chế hoạt động của MPLS}{6}{0}{4}
+\beamer@sectionintoc {5}{5. Control-Plane \& L2VPN}{8}{0}{5}
+\beamer@sectionintoc {6}{6. Đo lường \& Phân tích hiệu năng}{9}{0}{6}
+\beamer@sectionintoc {7}{7. Giao diện Giám sát \& Tự động hóa}{12}{0}{7}
+\beamer@sectionintoc {8}{8. Kết luận}{13}{0}{8}
