@@ -11,3 +11,13 @@ env/
 .ruff_cache/
 
 *.log
+
+# Demo/generated artifacts.
+Metro_Ethernet_MPLS_Project/results/*
+Metro_Ethernet_MPLS_Project/output/*
+Metro_Ethernet_MPLS_Project/images/*_chart.png
+Metro_Ethernet_MPLS_Project/images/topology_overview.png
+Metro_Ethernet_MPLS_Project/images/branch1_flat.png
+Metro_Ethernet_MPLS_Project/images/branch2_three_tier.png
+Metro_Ethernet_MPLS_Project/images/branch3_leaf_spine.png
+Metro_Ethernet_MPLS_Project/images/mpls_backbone.png

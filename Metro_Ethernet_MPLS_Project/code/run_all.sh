@@ -50,7 +50,8 @@ required_files=(
   "images/packet_loss_chart.png"
   "images/jitter_chart.png"
   "report/Bao_cao_Metro_Ethernet_MPLS_Mininet.docx"
-  "docs/Huong_dan_chay_va_thuyet_trinh.md"
+  "docs/Huong_dan_demo_thu_cong_Ubuntu.md"
+  "docs/Huong_dan_su_dung_gui_monitor.md"
   "README.md"
 )
 
